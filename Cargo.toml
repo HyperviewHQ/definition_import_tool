@@ -1,0 +1,25 @@
+[package]
+name = "bacnet_definition_loader"
+version = "0.1.0"
+edition = "2021"
+authors = ["Hyperview Technologies Inc."]
+description = "A loader for BACnet sensor definitions into Hyperview"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.69"
+clap = { version = "4.1.8", features = ["derive"] }
+confy = "0.5.1"
+dirs = "4.0.0"
+env_logger = "0.10.0"
+log = "0.4.17"
+oauth2 = "4.3.0"
+reqwest = { version = "0.11.14", features = ["blocking", "json"] }
+serde = "1.0.152"
+serde_json = "1.0.93"
+thiserror = "1.0.38"
+
+[profile.release]
+strip = true
+
