@@ -1,4 +1,4 @@
-use clap::{Parser};
+use clap::Parser;
 use log::LevelFilter;
 use serde::{Deserialize, Serialize};
 
@@ -23,9 +23,6 @@ pub fn get_config_path() -> String {
 pub struct AppArgs {
     #[arg(short, long, help = "Debug level", default_value = "info", value_parser(["trace", "debug", "info", "warn", "error"]))]
     pub debug_level: String,
-
-    #[arg(short = 'f', long, help = "Name of input csv file")]
-    pub input_file: String,
 }
 
 pub fn get_debug_filter(debug_level: &String) -> LevelFilter {
