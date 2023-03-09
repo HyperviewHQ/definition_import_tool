@@ -1,5 +1,4 @@
 use std::path::Path;
-
 use anyhow::Result;
 use clap::Parser;
 use hyperview::cli::{get_config_path, get_debug_filter, AppArgs, AppConfig};
@@ -22,12 +21,6 @@ fn main() -> Result<()> {
     info!("Starting BACnet definition import");
     info!("Startup options:\n| debug level: {} |\n", debug_level);
 
-    /*
-        if !Path::new(&input_file).exists() {
-            error!("Specified input file does not exists. exiting ...");
-            return Err(AppError::InputFileDoesNotExist.into());
-        }
-    */
     let config: AppConfig = confy::load_path(get_config_path())?;
     info!("Hyperview Instance: {}", config.instance_url);
 
