@@ -30,8 +30,6 @@ pub fn get_bacnet_definition_list(config: &AppConfig) -> Result<Vec<BacnetDefini
     // Get Authorization header for request
     let auth_header = get_auth_header(config)?;
 
-    let mut bacnet_definitions: Vec<BacnetDefinition> = Vec::new();
-
     // format target
     let target_url = format!("{}{}", config.instance_url, BACNET_API_PREFIX);
 
@@ -47,7 +45,5 @@ pub fn get_bacnet_definition_list(config: &AppConfig) -> Result<Vec<BacnetDefini
         .send()?
         .json::<Vec<BacnetDefinition>>()?;
 
-    bacnet_definitions = resp;
-
-    Ok(bacnet_definitions)
+    Ok(resp)
 }

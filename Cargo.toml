@@ -1,5 +1,5 @@
 [package]
-name = "bacnet_definition_loader"
+name = "definition_loader"
 version = "0.1.0"
 edition = "2021"
 authors = ["Hyperview Technologies Inc."]

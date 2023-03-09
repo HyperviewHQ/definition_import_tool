@@ -1,4 +1,4 @@
-use clap::Parser;
+use clap::{Args, Parser, Subcommand};
 use log::LevelFilter;
 use serde::{Deserialize, Serialize};
 
@@ -18,11 +18,33 @@ pub fn get_config_path() -> String {
     format!("{}/.hyperview/hyperview.toml", home_path.to_str().unwrap())
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser)]
 #[command(author, version, about, long_about = None)]
+#[command(propagate_version = true)]
 pub struct AppArgs {
     #[arg(short, long, help = "Debug level", default_value = "info", value_parser(["trace", "debug", "info", "warn", "error"]))]
     pub debug_level: String,
+
+    #[command(subcommand)]
+    pub command: LoaderCommands,
+}
+
+#[derive(Subcommand)]
+pub enum LoaderCommands {
+    /// List current BACnet definitions
+    ListBacnet,
+
+    /// Adds numeric sensor definitions to a definition
+    AddBacnetNumeric(AddBacnetArgs),
+}
+
+#[derive(Args)]
+pub struct AddBacnetArgs {
+    #[arg(short, long, help = "CSV file name")]
+    pub filename: String,
+
+    #[arg(short, long, help = "Definition id")]
+    pub definition_id: String,
 }
 
 pub fn get_debug_filter(debug_level: &String) -> LevelFilter {
