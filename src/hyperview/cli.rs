@@ -22,7 +22,7 @@ pub fn get_config_path() -> String {
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
 pub struct AppArgs {
-    #[arg(short, long, help = "Debug level", default_value = "info", value_parser(["trace", "debug", "info", "warn", "error"]))]
+    #[arg(short, long, help = "Debug level", default_value = "error", value_parser(["trace", "debug", "info", "warn", "error"]))]
     pub debug_level: String,
 
     #[command(subcommand)]
@@ -32,14 +32,61 @@ pub struct AppArgs {
 #[derive(Subcommand)]
 pub enum LoaderCommands {
     /// List current BACnet definitions
-    ListBacnet,
+    GetBacnetDefinitions,
+
+    /// Get sensors compatible with an asset type
+    GetSensors(GetSensorsArgs),
 
     /// Adds numeric sensor definitions to a definition
-    AddBacnetNumeric(AddBacnetArgs),
+    AddBacnetNumeric(AddBacnetNumericArgs),
 }
 
 #[derive(Args)]
-pub struct AddBacnetArgs {
+pub struct GetSensorsArgs {
+    #[arg(
+        short = 't',
+        long,
+        help = "Asset type. e.g. Rack",
+        value_parser([
+            "BladeEnclosure",
+            "BladeNetwork",
+            "BladeServer",
+            "BladeStorage",
+            "Busway",
+            "Camera",
+            "Chiller",
+            "Crac",
+            "Crah",
+            "Environmental",
+            "FireControlPanel",
+            "Generator",
+            "InRowCooling",
+            "KvmSwitch",
+            "Location",
+            "Monitor",
+            "NetworkDevice",
+            "NetworkStorage",
+            "NodeServer",
+            "PatchPanel",
+            "PduAndRpp",
+            "PowerMeter",
+            "Rack",
+            "RackPdu",
+            "Server",
+            "SmallUps",
+            "TransferSwitch",
+            "Ups",
+            "VirtualServer",
+        ])
+    )]
+    pub asset_type: String,
+
+    #[arg(short, long, help = "Sensor class. E.g. numeric", default_value = "numeric", value_parser(["numeric", "enum"]))]
+    pub sensor_class: String,
+}
+
+#[derive(Args)]
+pub struct AddBacnetNumericArgs {
     #[arg(short, long, help = "CSV file name")]
     pub filename: String,
 

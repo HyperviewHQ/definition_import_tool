@@ -1,11 +1,13 @@
-use std::path::Path;
 use anyhow::Result;
 use clap::Parser;
 use hyperview::cli::{get_config_path, get_debug_filter, AppArgs, AppConfig};
 use log::{error, info};
+use std::path::Path;
 
 use crate::hyperview::{
-    api::get_bacnet_definition_list, app_errors::AppError, cli::LoaderCommands,
+    api::{get_bacnet_definition_list, get_sensor_type_asset_type_map},
+    app_errors::AppError,
+    cli::LoaderCommands,
 };
 
 mod hyperview;
@@ -25,11 +27,29 @@ fn main() -> Result<()> {
     info!("Hyperview Instance: {}", config.instance_url);
 
     match &args.command {
-        LoaderCommands::ListBacnet => {
+        LoaderCommands::GetBacnetDefinitions => {
             let bacnet_defs = get_bacnet_definition_list(&config)?;
 
-            for def in bacnet_defs {
-                info!("{}", def);
+            for (i, def) in bacnet_defs.iter().enumerate() {
+                println!("---- [{}] ----", i);
+                println!("{}\n", def);
+            }
+        }
+
+        LoaderCommands::GetSensors(options) => {
+            let query = vec![
+                ("assetTypeId".to_string(), options.asset_type.clone()),
+                (
+                    "sensorTypeValueType".to_string(),
+                    options.sensor_class.clone(),
+                ),
+            ];
+
+            let sensor_types = get_sensor_type_asset_type_map(&config, query)?;
+
+            for (i, s) in sensor_types.iter().enumerate() {
+                println!("---- [{}] ----", i);
+                println!("{}\n", s);
             }
         }
 
