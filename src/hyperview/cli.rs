@@ -34,15 +34,15 @@ pub enum LoaderCommands {
     /// List current BACnet definitions
     GetBacnetDefinitions,
 
-    /// Get sensors compatible with an asset type
-    GetSensors(GetSensorsArgs),
+    /// Get sensor types compatible with an asset type
+    GetSensorTypes(GetSensorTypesArgs),
 
     /// Adds numeric sensor definitions to a definition
     AddBacnetNumeric(AddBacnetNumericArgs),
 }
 
 #[derive(Args)]
-pub struct GetSensorsArgs {
+pub struct GetSensorTypesArgs {
     #[arg(
         short = 't',
         long,

@@ -36,7 +36,7 @@ fn main() -> Result<()> {
             }
         }
 
-        LoaderCommands::GetSensors(options) => {
+        LoaderCommands::GetSensorTypes(options) => {
             let query = vec![
                 ("assetTypeId".to_string(), options.asset_type.clone()),
                 (
