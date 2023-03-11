@@ -5,7 +5,10 @@ use log::{error, info};
 use std::path::Path;
 
 use crate::hyperview::{
-    api::{get_bacnet_definition_list, get_sensor_type_asset_type_map},
+    api::{
+        add_bacnet_definition, get_bacnet_definition_list, get_bacnet_numeric_sensors,
+        get_sensor_type_asset_type_map,
+    },
     app_errors::AppError,
     cli::LoaderCommands,
 };
@@ -28,11 +31,27 @@ fn main() -> Result<()> {
 
     match &args.command {
         LoaderCommands::GetBacnetDefinitions => {
-            let bacnet_defs = get_bacnet_definition_list(&config)?;
+            let resp = get_bacnet_definition_list(&config)?;
 
-            for (i, def) in bacnet_defs.iter().enumerate() {
+            for (i, d) in resp.iter().enumerate() {
                 println!("---- [{}] ----", i);
-                println!("{}\n", def);
+                println!("{}\n", d);
+            }
+        }
+
+        LoaderCommands::AddBacnetDefinition(options) => {
+            let resp =
+                add_bacnet_definition(&config, options.name.clone(), options.asset_type.clone())?;
+
+            println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
+        }
+
+        LoaderCommands::GetBacnetNumericSensors(options) => {
+            let resp = get_bacnet_numeric_sensors(&config, options.definition_id.clone())?;
+
+            for (i, s) in resp.iter().enumerate() {
+                println!("---- [{}] ----", i);
+                println!("{}\n", s);
             }
         }
 

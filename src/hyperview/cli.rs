@@ -2,6 +2,38 @@ use clap::{Args, Parser, Subcommand};
 use log::LevelFilter;
 use serde::{Deserialize, Serialize};
 
+const ASSET_TYPES: [&str; 29] = [
+    "BladeEnclosure",
+    "BladeNetwork",
+    "BladeServer",
+    "BladeStorage",
+    "Busway",
+    "Camera",
+    "Chiller",
+    "Crac",
+    "Crah",
+    "Environmental",
+    "FireControlPanel",
+    "Generator",
+    "InRowCooling",
+    "KvmSwitch",
+    "Location",
+    "Monitor",
+    "NetworkDevice",
+    "NetworkStorage",
+    "NodeServer",
+    "PatchPanel",
+    "PduAndRpp",
+    "PowerMeter",
+    "Rack",
+    "RackPdu",
+    "Server",
+    "SmallUps",
+    "TransferSwitch",
+    "Ups",
+    "VirtualServer",
+];
+
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct AppConfig {
     pub client_id: String,
@@ -34,11 +66,17 @@ pub enum LoaderCommands {
     /// List current BACnet definitions
     GetBacnetDefinitions,
 
-    /// Get sensor types compatible with an asset type
-    GetSensorTypes(GetSensorTypesArgs),
+    /// Add a new BACnet definition
+    AddBacnetDefinition(AddBacnetDefinitionArgs),
+
+    /// Get a list of existing numeric sensors for a specific definintion
+    GetBacnetNumericSensors(GetBacnetNumericSensorsArgs),
 
     /// Adds numeric sensor definitions to a definition
     AddBacnetNumeric(AddBacnetNumericArgs),
+
+    /// Get sensor types compatible with an asset type
+    GetSensorTypes(GetSensorTypesArgs),
 }
 
 #[derive(Args)]
@@ -46,38 +84,8 @@ pub struct GetSensorTypesArgs {
     #[arg(
         short = 't',
         long,
-        help = "Asset type. e.g. Rack",
-        value_parser([
-            "BladeEnclosure",
-            "BladeNetwork",
-            "BladeServer",
-            "BladeStorage",
-            "Busway",
-            "Camera",
-            "Chiller",
-            "Crac",
-            "Crah",
-            "Environmental",
-            "FireControlPanel",
-            "Generator",
-            "InRowCooling",
-            "KvmSwitch",
-            "Location",
-            "Monitor",
-            "NetworkDevice",
-            "NetworkStorage",
-            "NodeServer",
-            "PatchPanel",
-            "PduAndRpp",
-            "PowerMeter",
-            "Rack",
-            "RackPdu",
-            "Server",
-            "SmallUps",
-            "TransferSwitch",
-            "Ups",
-            "VirtualServer",
-        ])
+        help = "Asset type. e.g. Crah",
+        value_parser(ASSET_TYPES)
     )]
     pub asset_type: String,
 
@@ -90,6 +98,26 @@ pub struct AddBacnetNumericArgs {
     #[arg(short, long, help = "CSV file name")]
     pub filename: String,
 
+    #[arg(short, long, help = "Definition id")]
+    pub definition_id: String,
+}
+
+#[derive(Args)]
+pub struct AddBacnetDefinitionArgs {
+    #[arg(short, long, help = "Definition name")]
+    pub name: String,
+
+    #[arg(
+        short = 't',
+        long,
+        help = "Asset type. e.g. Crah",
+        value_parser(ASSET_TYPES)
+    )]
+    pub asset_type: String,
+}
+
+#[derive(Args)]
+pub struct GetBacnetNumericSensorsArgs {
     #[arg(short, long, help = "Definition id")]
     pub definition_id: String,
 }
