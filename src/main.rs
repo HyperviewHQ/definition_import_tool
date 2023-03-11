@@ -1,6 +1,5 @@
 use anyhow::Result;
 use clap::Parser;
-use hyperview::cli::{get_config_path, get_debug_filter, AppArgs, AppConfig};
 use log::{error, info};
 use std::path::Path;
 
@@ -10,7 +9,7 @@ use crate::hyperview::{
         get_sensor_type_asset_type_map,
     },
     app_errors::AppError,
-    cli::LoaderCommands,
+    cli::{get_config_path, get_debug_filter, AppArgs, AppConfig, LoaderCommands},
 };
 
 mod hyperview;
@@ -55,6 +54,22 @@ fn main() -> Result<()> {
             }
         }
 
+        LoaderCommands::AddBacnetNumericSensor(options) => {
+            let input_file = &options.filename;
+
+            if !Path::new(&input_file).exists() {
+                error!("Specified input file does not exists. exiting ...");
+                return Err(AppError::InputFileDoesNotExist.into());
+            }
+
+            let definition_id = &options.definition_id;
+
+            info!(
+                "Uploading numeric sensors using file: {}, for definition: {}",
+                input_file, definition_id
+            );
+        }
+
         LoaderCommands::GetSensorTypes(options) => {
             let query = vec![
                 ("assetTypeId".to_string(), options.asset_type.clone()),
@@ -70,22 +85,6 @@ fn main() -> Result<()> {
                 println!("---- [{}] ----", i);
                 println!("{}\n", s);
             }
-        }
-
-        LoaderCommands::AddBacnetNumeric(options) => {
-            let input_file = &options.filename;
-
-            if !Path::new(&input_file).exists() {
-                error!("Specified input file does not exists. exiting ...");
-                return Err(AppError::InputFileDoesNotExist.into());
-            }
-
-            let definition_id = &options.definition_id;
-
-            info!(
-                "Uploading numeric sensors using file: {}, for definition: {}",
-                input_file, definition_id
-            );
         }
     }
 

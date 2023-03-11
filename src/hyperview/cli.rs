@@ -72,8 +72,8 @@ pub enum LoaderCommands {
     /// Get a list of existing numeric sensors for a specific definintion
     GetBacnetNumericSensors(GetBacnetNumericSensorsArgs),
 
-    /// Adds numeric sensor definitions to a definition
-    AddBacnetNumeric(AddBacnetNumericArgs),
+    /// Adds numeric sensors to a definition
+    AddBacnetNumericSensor(AddBacnetNumericArgs),
 
     /// Get sensor types compatible with an asset type
     GetSensorTypes(GetSensorTypesArgs),
