@@ -1,4 +1,6 @@
+use anyhow::Result;
 use clap::{Args, Parser, Subcommand};
+use csv::Writer;
 use log::LevelFilter;
 use serde::{Deserialize, Serialize};
 
@@ -120,6 +122,12 @@ pub struct AddBacnetDefinitionArgs {
 pub struct GetBacnetNumericSensorsArgs {
     #[arg(short, long, help = "Definition id")]
     pub definition_id: String,
+
+    #[arg(short, long, help = "Select output type. E.g. csv", default_value = "record", value_parser(["record", "csv"]))]
+    pub output_type: String,
+
+    #[arg(short, long, help = "output filename. E.g. output.csv")]
+    pub filename: Option<String>,
 }
 
 pub fn get_debug_filter(debug_level: &String) -> LevelFilter {
@@ -134,4 +142,14 @@ pub fn get_debug_filter(debug_level: &String) -> LevelFilter {
     } else {
         LevelFilter::Info
     }
+}
+
+pub fn write_output<T: Serialize>(filename: String, object_list: Vec<T>) -> Result<()> {
+    let mut writer = Writer::from_path(filename)?;
+
+    for object in object_list {
+        writer.serialize(object)?;
+    }
+
+    Ok(())
 }

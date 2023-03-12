@@ -9,7 +9,7 @@ use crate::hyperview::{
         get_sensor_type_asset_type_map,
     },
     app_errors::AppError,
-    cli::{get_config_path, get_debug_filter, AppArgs, AppConfig, LoaderCommands},
+    cli::{get_config_path, get_debug_filter, write_output, AppArgs, AppConfig, LoaderCommands},
 };
 
 mod hyperview;
@@ -48,9 +48,25 @@ fn main() -> Result<()> {
         LoaderCommands::GetBacnetNumericSensors(options) => {
             let resp = get_bacnet_numeric_sensors(&config, options.definition_id.clone())?;
 
-            for (i, s) in resp.iter().enumerate() {
-                println!("---- [{}] ----", i);
-                println!("{}\n", s);
+            if options.output_type == "csv".to_string() {
+                if let None = options.filename {
+                    error!("Must provide a filename. exiting ...");
+                    return Err(AppError::NoOutputFilename.into());
+                } else {
+                    if let Some(filename) = &options.filename {
+                        if Path::new(&filename).exists() {
+                            error!("Specified file already exists. exiting ...");
+                            return Err(AppError::FileExists.into());
+                        }
+
+                        write_output(filename.to_owned(), resp)?;
+                    }
+                }
+            } else {
+                for (i, s) in resp.iter().enumerate() {
+                    println!("---- [{}] ----", i);
+                    println!("{}\n", s);
+                }
             }
         }
 
