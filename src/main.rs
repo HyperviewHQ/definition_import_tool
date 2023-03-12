@@ -9,7 +9,9 @@ use crate::hyperview::{
         get_sensor_type_asset_type_map,
     },
     app_errors::AppError,
-    cli::{get_config_path, get_debug_filter, write_output, AppArgs, AppConfig, LoaderCommands},
+    cli::{
+        get_config_path, get_debug_filter, handle_output_choice, AppArgs, AppConfig, LoaderCommands,
+    },
 };
 
 mod hyperview;
@@ -47,27 +49,10 @@ fn main() -> Result<()> {
 
         LoaderCommands::GetBacnetNumericSensors(options) => {
             let resp = get_bacnet_numeric_sensors(&config, options.definition_id.clone())?;
+            let filename = &options.filename;
+            let output_type = &options.output_type;
 
-            if options.output_type == "csv".to_string() {
-                if let None = options.filename {
-                    error!("Must provide a filename. exiting ...");
-                    return Err(AppError::NoOutputFilename.into());
-                } else {
-                    if let Some(filename) = &options.filename {
-                        if Path::new(&filename).exists() {
-                            error!("Specified file already exists. exiting ...");
-                            return Err(AppError::FileExists.into());
-                        }
-
-                        write_output(filename.to_owned(), resp)?;
-                    }
-                }
-            } else {
-                for (i, s) in resp.iter().enumerate() {
-                    println!("---- [{}] ----", i);
-                    println!("{}\n", s);
-                }
-            }
+            handle_output_choice(output_type.to_owned(), filename.to_owned(), resp)?;
         }
 
         LoaderCommands::AddBacnetNumericSensor(options) => {
@@ -95,12 +80,11 @@ fn main() -> Result<()> {
                 ),
             ];
 
-            let sensor_types = get_sensor_type_asset_type_map(&config, query)?;
+            let resp = get_sensor_type_asset_type_map(&config, query)?;
+            let filename = &options.filename;
+            let output_type = &options.output_type;
 
-            for (i, s) in sensor_types.iter().enumerate() {
-                println!("---- [{}] ----", i);
-                println!("{}\n", s);
-            }
+            handle_output_choice(output_type.to_owned(), filename.to_owned(), resp)?;
         }
     }
 

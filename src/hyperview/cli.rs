@@ -1,8 +1,12 @@
 use anyhow::Result;
 use clap::{Args, Parser, Subcommand};
 use csv::Writer;
-use log::LevelFilter;
+use log::{error, LevelFilter};
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
+use std::path::Path;
+
+use crate::hyperview::app_errors::AppError;
 
 const ASSET_TYPES: [&str; 29] = [
     "BladeEnclosure",
@@ -82,29 +86,6 @@ pub enum LoaderCommands {
 }
 
 #[derive(Args)]
-pub struct GetSensorTypesArgs {
-    #[arg(
-        short = 't',
-        long,
-        help = "Asset type. e.g. Crah",
-        value_parser(ASSET_TYPES)
-    )]
-    pub asset_type: String,
-
-    #[arg(short, long, help = "Sensor class. E.g. numeric", default_value = "numeric", value_parser(["numeric", "enum"]))]
-    pub sensor_class: String,
-}
-
-#[derive(Args)]
-pub struct AddBacnetNumericArgs {
-    #[arg(short, long, help = "CSV file name")]
-    pub filename: String,
-
-    #[arg(short, long, help = "Definition id")]
-    pub definition_id: String,
-}
-
-#[derive(Args)]
 pub struct AddBacnetDefinitionArgs {
     #[arg(short, long, help = "Definition name")]
     pub name: String,
@@ -122,6 +103,35 @@ pub struct AddBacnetDefinitionArgs {
 pub struct GetBacnetNumericSensorsArgs {
     #[arg(short, long, help = "Definition id")]
     pub definition_id: String,
+
+    #[arg(short, long, help = "Select output type. E.g. csv", default_value = "record", value_parser(["record", "csv"]))]
+    pub output_type: String,
+
+    #[arg(short, long, help = "output filename. E.g. output.csv")]
+    pub filename: Option<String>,
+}
+
+#[derive(Args)]
+pub struct AddBacnetNumericArgs {
+    #[arg(short, long, help = "CSV file name")]
+    pub filename: String,
+
+    #[arg(short, long, help = "Definition id")]
+    pub definition_id: String,
+}
+
+#[derive(Args)]
+pub struct GetSensorTypesArgs {
+    #[arg(
+        short = 't',
+        long,
+        help = "Asset type. e.g. Crah",
+        value_parser(ASSET_TYPES)
+    )]
+    pub asset_type: String,
+
+    #[arg(short, long, help = "Sensor class. E.g. numeric", default_value = "numeric", value_parser(["numeric", "enum"]))]
+    pub sensor_class: String,
 
     #[arg(short, long, help = "Select output type. E.g. csv", default_value = "record", value_parser(["record", "csv"]))]
     pub output_type: String,
@@ -151,5 +161,33 @@ pub fn write_output<T: Serialize>(filename: String, object_list: Vec<T>) -> Resu
         writer.serialize(object)?;
     }
 
+    Ok(())
+}
+
+pub fn handle_output_choice<T: Display + Serialize>(
+    output_type: String,
+    filename: Option<String>,
+    resp: Vec<T>,
+) -> Result<()> {
+    if output_type == "csv".to_string() {
+        if let None = filename {
+            error!("Must provide a filename. exiting ...");
+            return Err(AppError::NoOutputFilename.into());
+        } else {
+            if let Some(f) = filename {
+                if Path::new(&f).exists() {
+                    error!("Specified file already exists. exiting ...");
+                    return Err(AppError::FileExists.into());
+                }
+
+                write_output(f, resp)?;
+            }
+        }
+    } else {
+        for (i, s) in resp.iter().enumerate() {
+            println!("---- [{}] ----", i);
+            println!("{}\n", s);
+        }
+    }
     Ok(())
 }
