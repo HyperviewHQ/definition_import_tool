@@ -70,7 +70,7 @@ fn main() -> Result<()> {
                 filename, definition_id
             );
 
-            add_or_update_numeric_sensor(&config, filename.to_owned())?;
+            add_or_update_numeric_sensor(&config, definition_id.to_owned(), filename.to_owned())?;
         }
 
         LoaderCommands::GetSensorTypes(options) => {

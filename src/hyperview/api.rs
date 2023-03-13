@@ -1,10 +1,11 @@
 use anyhow::Result;
-use log::info;
+use log::{error, info};
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_with::{serde_as, DefaultOnError};
 use std::fmt;
+use uuid::Uuid;
 
 use super::{auth::get_auth_header, cli::AppConfig};
 
@@ -208,26 +209,71 @@ pub fn get_sensor_type_asset_type_map(
     Ok(resp)
 }
 
-pub fn add_or_update_numeric_sensor(config: &AppConfig, filename: String) -> Result<()> {
+pub fn add_or_update_numeric_sensor(
+    config: &AppConfig,
+    definition_id: String,
+    filename: String,
+) -> Result<()> {
     // Get Authorization header for request
     let auth_header = get_auth_header(config)?;
-
-    // format target
-    let target_url = format!("{}{}", config.instance_url, SENSOR_TYPE_ASSET_TYPE);
 
     // Start http client
     let req = reqwest::blocking::Client::new();
 
     let mut reader = csv::Reader::from_path(filename)?;
 
-    while let Some(Ok(row)) = reader
+    while let Some(Ok(sensor)) = reader
         .deserialize::<BacnetIpNumericSensor>()
         .into_iter()
         .next()
     {
-        let sensor = row;
+        info!("Processing input line: {:?}", sensor);
 
-        info!("Input line: {:?}", sensor);
+        match Uuid::try_parse(&sensor.id) {
+            Ok(u) => {
+                // existing sensor with valid uuid
+                println!("Updating sensor with id: {} and name: {}", u, &sensor.name);
+
+                let target_url = format!(
+                    "{}{}/bacnetIpNumericSensors/{}/{}",
+                    config.instance_url, BACNET_API_PREFIX, definition_id, u
+                );
+
+                let resp = req
+                    .put(target_url)
+                    .header(AUTHORIZATION, auth_header.clone())
+                    .header(CONTENT_TYPE, "application/json")
+                    .header(ACCEPT, "application/json")
+                    .json(&sensor)
+                    .send()?
+                    .status();
+
+                println!("server respone: {:#?}", resp);
+            }
+
+            Err(e) => {
+                if &sensor.name.len() > &0 && &sensor.id == &"".to_string() {
+                    println!("Adding new sensor");
+                    let target_url = format!(
+                        "{}{}/bacnetIpNumericSensors/{}",
+                        config.instance_url, BACNET_API_PREFIX, definition_id
+                    );
+
+                    let resp = req
+                        .post(target_url)
+                        .header(AUTHORIZATION, auth_header.clone())
+                        .header(CONTENT_TYPE, "application/json")
+                        .header(ACCEPT, "application/json")
+                        .json(&sensor)
+                        .send()?
+                        .status();
+
+                    println!("server respone: {:#?}", resp);
+                } else {
+                    error!("Error parsing provided sensor id: {}", e);
+                }
+            }
+        }
     }
 
     Ok(())
