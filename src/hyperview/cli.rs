@@ -60,7 +60,7 @@ pub fn get_config_path() -> String {
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
 pub struct AppArgs {
-    #[arg(short, long, help = "Debug level", default_value = "error", value_parser(["trace", "debug", "info", "warn", "error"]))]
+    #[arg(short = 'l', long, help = "Debug level", default_value = "error", value_parser(["trace", "debug", "info", "warn", "error"]))]
     pub debug_level: String,
 
     #[command(subcommand)]

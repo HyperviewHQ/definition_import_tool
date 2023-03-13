@@ -5,8 +5,8 @@ use std::path::Path;
 
 use crate::hyperview::{
     api::{
-        add_bacnet_definition, get_bacnet_definition_list, get_bacnet_numeric_sensors,
-        get_sensor_type_asset_type_map,
+        add_bacnet_definition, add_or_update_numeric_sensor, get_bacnet_definition_list,
+        get_bacnet_numeric_sensors, get_sensor_type_asset_type_map,
     },
     app_errors::AppError,
     cli::{
@@ -56,9 +56,9 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::AddBacnetNumericSensor(options) => {
-            let input_file = &options.filename;
+            let filename = &options.filename;
 
-            if !Path::new(&input_file).exists() {
+            if !Path::new(filename).exists() {
                 error!("Specified input file does not exists. exiting ...");
                 return Err(AppError::InputFileDoesNotExist.into());
             }
@@ -67,8 +67,10 @@ fn main() -> Result<()> {
 
             info!(
                 "Uploading numeric sensors using file: {}, for definition: {}",
-                input_file, definition_id
+                filename, definition_id
             );
+
+            add_or_update_numeric_sensor(&config, filename.to_owned())?;
         }
 
         LoaderCommands::GetSensorTypes(options) => {

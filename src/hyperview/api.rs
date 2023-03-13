@@ -1,4 +1,5 @@
 use anyhow::Result;
+use log::info;
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -205,4 +206,29 @@ pub fn get_sensor_type_asset_type_map(
         .json::<Vec<SensorType>>()?;
 
     Ok(resp)
+}
+
+pub fn add_or_update_numeric_sensor(config: &AppConfig, filename: String) -> Result<()> {
+    // Get Authorization header for request
+    let auth_header = get_auth_header(config)?;
+
+    // format target
+    let target_url = format!("{}{}", config.instance_url, SENSOR_TYPE_ASSET_TYPE);
+
+    // Start http client
+    let req = reqwest::blocking::Client::new();
+
+    let mut reader = csv::Reader::from_path(filename)?;
+
+    while let Some(Ok(row)) = reader
+        .deserialize::<BacnetIpNumericSensor>()
+        .into_iter()
+        .next()
+    {
+        let sensor = row;
+
+        info!("Input line: {:?}", sensor);
+    }
+
+    Ok(())
 }
