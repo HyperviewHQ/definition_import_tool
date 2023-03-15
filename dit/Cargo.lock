@@ -291,26 +291,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "definition_loader"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "confy",
- "csv",
- "dirs",
- "env_logger",
- "log",
- "oauth2",
- "reqwest",
- "serde",
- "serde_json",
- "serde_with",
- "thiserror",
- "uuid",
-]
-
-[[package]]
 name = "digest"
 version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -347,6 +327,26 @@ dependencies = [
  "libc",
  "redox_users",
  "winapi",
+]
+
+[[package]]
+name = "dit"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "confy",
+ "csv",
+ "dirs",
+ "env_logger",
+ "log",
+ "oauth2",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]
