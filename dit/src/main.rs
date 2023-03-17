@@ -6,7 +6,7 @@ use std::path::Path;
 use crate::hyperview::{
     api::{
         add_bacnet_definition, add_or_update_numeric_sensor, get_bacnet_definition_list,
-        get_bacnet_numeric_sensors, get_sensor_type_asset_type_map,
+        get_bacnet_numeric_sensors, get_sensor_type_asset_type_map, get_bacnet_non_numeric_sensors,
     },
     app_errors::AppError,
     cli::{
@@ -49,6 +49,14 @@ fn main() -> Result<()> {
 
         LoaderCommands::GetBacnetNumericSensors(options) => {
             let resp = get_bacnet_numeric_sensors(&config, options.definition_id.clone())?;
+            let filename = &options.filename;
+            let output_type = &options.output_type;
+
+            handle_output_choice(output_type.to_owned(), filename.to_owned(), resp)?;
+        }
+
+        LoaderCommands::GetBacnetNonNumericSensors(options) => {
+            let resp = get_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 

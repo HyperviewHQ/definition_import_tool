@@ -76,7 +76,10 @@ pub enum LoaderCommands {
     AddBacnetDefinition(AddBacnetDefinitionArgs),
 
     /// Get a list of existing numeric sensors for a specific definintion
-    GetBacnetNumericSensors(GetBacnetNumericSensorsArgs),
+    GetBacnetNumericSensors(GetSensorsArgs),
+
+    /// Get a list of existing non-numeric sensors for a specific definintion
+    GetBacnetNonNumericSensors(GetSensorsArgs),
 
     /// Adds numeric sensors to a definition
     AddBacnetNumericSensor(AddBacnetNumericArgs),
@@ -100,7 +103,7 @@ pub struct AddBacnetDefinitionArgs {
 }
 
 #[derive(Args)]
-pub struct GetBacnetNumericSensorsArgs {
+pub struct GetSensorsArgs {
     #[arg(short, long, help = "Definition id")]
     pub definition_id: String,
 

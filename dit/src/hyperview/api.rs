@@ -100,6 +100,49 @@ impl fmt::Display for SensorType {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct ValueMapping {
+    text: String,
+    value: usize
+}
+
+impl fmt::Display for ValueMapping {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "text: {}, value: {}",
+            self.text, self.value
+        )
+    }
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BacnetIpNonNumericSensor {
+    id: String,
+    name: String,
+    #[serde(alias = "objectType")]
+    object_type: String,
+    #[serde(alias = "sensorType")]
+    sensor_type: String,
+    #[serde(alias = "sensorTypeId")]
+    sensor_type_id: String,
+    #[serde(alias = "valueMapping")]
+    value_mapping: Vec<ValueMapping>
+}
+
+impl fmt::Display for BacnetIpNonNumericSensor {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let sensor_header = format!(
+            "id: {}\nname: {}\nobject type: {}\nsensor type: {}\nsensor type id: {}",
+            self.id, self.name, self.object_type, self.sensor_type, self.sensor_type_id
+        );
+        let sensor_value_mapping = &self.value_mapping.iter().fold(String::new(), |acc, m| {acc + "\n" + &m.to_string()});
+
+        write!(f, "{}\n{}", sensor_header, sensor_value_mapping)
+    }
+}
+
 pub fn get_bacnet_definition_list(config: &AppConfig) -> Result<Vec<BacnetDefinition>> {
     // Get Authorization header for request
     let auth_header = get_auth_header(config)?;
@@ -146,6 +189,34 @@ pub fn get_bacnet_numeric_sensors(
         .header(ACCEPT, "application/json")
         .send()?
         .json::<Vec<BacnetIpNumericSensor>>()?;
+
+    Ok(resp)
+}
+
+pub fn get_bacnet_non_numeric_sensors(
+    config: &AppConfig,
+    definition_id: String,
+) -> Result<Vec<BacnetIpNonNumericSensor>> {
+    // Get Authorization header for request
+    let auth_header = get_auth_header(config)?;
+
+    // format target
+    let target_url = format!(
+        "{}{}/bacnetIpNonNumericSensors/{}",
+        config.instance_url, BACNET_API_PREFIX, definition_id
+    );
+
+    // Start http client
+    let req = reqwest::blocking::Client::new();
+
+    // Get response
+    let resp = req
+        .get(target_url)
+        .header(AUTHORIZATION, auth_header)
+        .header(CONTENT_TYPE, "application/json")
+        .header(ACCEPT, "application/json")
+        .send()?
+        .json::<Vec<BacnetIpNonNumericSensor>>()?;
 
     Ok(resp)
 }
