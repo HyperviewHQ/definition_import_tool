@@ -6,7 +6,7 @@ use std::path::Path;
 use crate::hyperview::{
     api::{
         add_bacnet_definition, add_or_update_numeric_sensor, get_bacnet_definition_list,
-        get_bacnet_numeric_sensors, get_sensor_type_asset_type_map, get_bacnet_non_numeric_sensors,
+        get_bacnet_non_numeric_sensors, get_bacnet_numeric_sensors, get_sensor_type_asset_type_map,
     },
     app_errors::AppError,
     cli::{
