@@ -1,7 +1,7 @@
 use anyhow::Result;
 use log::{error, info};
 use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, ser::SerializeStruct};
 use serde_json::Value;
 use serde_with::{serde_as, DefaultOnError};
 use std::fmt;
@@ -116,7 +116,7 @@ impl fmt::Display for ValueMapping {
     }
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BacnetIpNonNumericSensor {
     id: String,
@@ -140,6 +140,32 @@ impl fmt::Display for BacnetIpNonNumericSensor {
         let sensor_value_mapping = &self.value_mapping.iter().fold(String::new(), |acc, m| {acc + "\n" + &m.to_string()});
 
         write!(f, "{}\n{}", sensor_header, sensor_value_mapping)
+    }
+}
+
+impl Serialize for BacnetIpNonNumericSensor {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer {
+
+        let mut state = serializer.serialize_struct("BacnetIpNonNumericSensor", 7)?;
+
+        state.serialize_field("id", &self.id)?;
+        state.serialize_field("name", &self.name)?;
+        state.serialize_field("objectType", &self.object_type)?;
+        state.serialize_field("sensorType", &self.sensor_type)?;
+        state.serialize_field("sensorTypeId", &self.sensor_type_id)?;
+
+        let value_mapping_str = self
+            .value_mapping
+            .iter()
+            .map(|vm| format!("{}:{}", vm.text, vm.value))
+            .collect::<Vec<String>>()
+            .join(",");
+
+        state.serialize_field("valueMapping", &value_mapping_str)?;
+
+        state.end()
     }
 }
 
@@ -349,3 +375,40 @@ pub fn add_or_update_numeric_sensor(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_sensor_csv_serialization() {
+        let sensor = BacnetIpNonNumericSensor {
+            id: "247a4ad9-9d18-4bf4-b20b-a1d7d61b3971".to_string(),
+            name: "Sensor 1".to_string(),
+            object_type: "Temperature".to_string(),
+            sensor_type: "Analog".to_string(),
+            sensor_type_id: "1000".to_string(),
+            value_mapping: vec![
+                ValueMapping {
+                    text: "Low".to_string(),
+                    value: 0,
+                },
+                ValueMapping {
+                    text: "High".to_string(),
+                    value: 1,
+                },
+            ],
+        };
+
+        let mut wtr = csv::Writer::from_writer(vec![]);
+        wtr.serialize(&sensor).expect("Failed to serialize sensor");
+
+        let data = String::from_utf8(wtr.into_inner().expect("Failed to get inner writer"))
+            .expect("Failed to convert to string");
+
+        let expected_data = "id,name,objectType,sensorType,sensorTypeId,valueMapping\n247a4ad9-9d18-4bf4-b20b-a1d7d61b3971,Sensor 1,Temperature,Analog,1000,\"Low:0,High:1\"\n";
+
+        assert_eq!(data, expected_data);
+    }
+}
+
