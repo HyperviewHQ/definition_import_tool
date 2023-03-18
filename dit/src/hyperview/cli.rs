@@ -82,7 +82,10 @@ pub enum LoaderCommands {
     GetBacnetNonNumericSensors(GetSensorsArgs),
 
     /// Adds numeric sensors to a definition
-    AddBacnetNumericSensor(AddBacnetNumericArgs),
+    AddBacnetNumericSensor(AddSensorArgs),
+
+    /// Adds non-numeric sensors to a definition
+    AddBacnetNonNumericSensor(AddSensorArgs),
 
     /// Get sensor types compatible with an asset type
     GetSensorTypes(GetSensorTypesArgs),
@@ -115,7 +118,7 @@ pub struct GetSensorsArgs {
 }
 
 #[derive(Args)]
-pub struct AddBacnetNumericArgs {
+pub struct AddSensorArgs {
     #[arg(short, long, help = "CSV file name")]
     pub filename: String,
 

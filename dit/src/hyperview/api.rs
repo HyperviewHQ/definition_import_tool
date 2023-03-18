@@ -215,3 +215,78 @@ pub fn add_or_update_numeric_sensor(
 
     Ok(())
 }
+
+pub fn add_or_update_non_numeric_sensor(
+    config: &AppConfig,
+    definition_id: String,
+    filename: String,
+) -> Result<()> {
+    // Get Authorization header for request
+    let auth_header = get_auth_header(config)?;
+
+    // Start http client
+    let req = reqwest::blocking::Client::new();
+
+    let mut reader = csv::Reader::from_path(filename)?;
+
+    while let Some(Ok(sensor_csv)) = reader
+        .deserialize::<BacnetIpNonNumericSersorCsv>()
+        .into_iter()
+        .next()
+    {
+        info!("Processing input line: {:?}", sensor_csv);
+        let sensor: BacnetIpNonNumericSensor = sensor_csv.into();
+
+        match Uuid::try_parse(&sensor.id) {
+            Ok(u) => {
+                // existing sensor with valid uuid
+                println!(
+                    "Updating sensor with id: {} and name: {}",
+                    u,
+                    serde_json::to_string_pretty(&sensor)?
+                );
+
+                let target_url = format!(
+                    "{}{}/bacnetIpNonNumericSensors/{}/{}",
+                    config.instance_url, BACNET_API_PREFIX, definition_id, u
+                );
+
+                let resp = req
+                    .put(target_url)
+                    .header(AUTHORIZATION, auth_header.clone())
+                    .header(CONTENT_TYPE, "application/json")
+                    .header(ACCEPT, "application/json")
+                    .json(&sensor)
+                    .send()?
+                    .status();
+
+                println!("server respone: {:#?}", resp);
+            }
+
+            Err(e) => {
+                if &sensor.name.len() > &0 && &sensor.id == &"".to_string() {
+                    println!("Adding new sensor");
+                    let target_url = format!(
+                        "{}{}/bacnetIpNonNumericSensors/{}",
+                        config.instance_url, BACNET_API_PREFIX, definition_id
+                    );
+
+                    let resp = req
+                        .post(target_url)
+                        .header(AUTHORIZATION, auth_header.clone())
+                        .header(CONTENT_TYPE, "application/json")
+                        .header(ACCEPT, "application/json")
+                        .json(&sensor)
+                        .send()?
+                        .status();
+
+                    println!("server respone: {:#?}", resp);
+                } else {
+                    error!("Error parsing provided sensor id: {}", e);
+                }
+            }
+        }
+    }
+
+    Ok(())
+}

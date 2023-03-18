@@ -102,11 +102,29 @@ impl fmt::Display for ValueMapping {
     }
 }
 
-#[derive(Debug, Default, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct BacnetIpNonNumericSensor {
+#[derive(Debug, Deserialize)]
+pub struct BacnetIpNonNumericSersorCsv {
     id: String,
     name: String,
+    #[serde(alias = "objectInstance")]
+    object_instance: usize,
+    #[serde(alias = "objectType")]
+    object_type: String,
+    #[serde(alias = "sensorType")]
+    sensor_type: String,
+    #[serde(alias = "sensorTypeId")]
+    sensor_type_id: String,
+    #[serde(alias = "valueMapping")]
+    value_mapping: String,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BacnetIpNonNumericSensor {
+    pub id: String,
+    pub name: String,
+    #[serde(alias = "objectInstance")]
+    object_instance: usize,
     #[serde(alias = "objectType")]
     object_type: String,
     #[serde(alias = "sensorType")]
@@ -132,20 +150,30 @@ impl fmt::Display for BacnetIpNonNumericSensor {
     }
 }
 
-impl Serialize for BacnetIpNonNumericSensor {
+pub struct BacnetIpNonNumericSensorExportWrapper(pub BacnetIpNonNumericSensor);
+
+impl fmt::Display for BacnetIpNonNumericSensorExportWrapper {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Serialize for BacnetIpNonNumericSensorExportWrapper {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        let mut state = serializer.serialize_struct("BacnetIpNonNumericSensor", 7)?;
+        let mut state = serializer.serialize_struct("BacnetIpNonNumericSensorExportWrapper", 7)?;
 
-        state.serialize_field("id", &self.id)?;
-        state.serialize_field("name", &self.name)?;
-        state.serialize_field("objectType", &self.object_type)?;
-        state.serialize_field("sensorType", &self.sensor_type)?;
-        state.serialize_field("sensorTypeId", &self.sensor_type_id)?;
+        state.serialize_field("id", &self.0.id)?;
+        state.serialize_field("name", &self.0.name)?;
+        state.serialize_field("objectInstance", &self.0.object_instance)?;
+        state.serialize_field("objectType", &self.0.object_type)?;
+        state.serialize_field("sensorType", &self.0.sensor_type)?;
+        state.serialize_field("sensorTypeId", &self.0.sensor_type_id)?;
 
         let value_mapping_str = self
+            .0
             .value_mapping
             .iter()
             .map(|vm| format!("{}:{}", vm.text, vm.value))
@@ -158,6 +186,35 @@ impl Serialize for BacnetIpNonNumericSensor {
     }
 }
 
+impl From<BacnetIpNonNumericSersorCsv> for BacnetIpNonNumericSensor {
+    fn from(source: BacnetIpNonNumericSersorCsv) -> Self {
+        let mappings = source
+            .value_mapping
+            .split(',')
+            .filter_map(|pair| {
+                let mut parts = pair.splitn(2, ':');
+                Some(ValueMapping {
+                    text: parts.next()?.to_string(),
+                    value: parts
+                        .next()?
+                        .parse::<usize>()
+                        .expect("could not parse value to integer"),
+                })
+            })
+            .collect();
+
+        BacnetIpNonNumericSensor {
+            id: source.id,
+            name: source.name,
+            object_instance: source.object_instance,
+            object_type: source.object_type,
+            sensor_type: source.sensor_type,
+            sensor_type_id: source.sensor_type_id,
+            value_mapping: mappings,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -167,6 +224,7 @@ mod tests {
         let sensor = BacnetIpNonNumericSensor {
             id: "247a4ad9-9d18-4bf4-b20b-a1d7d61b3971".to_string(),
             name: "Sensor 1".to_string(),
+            object_instance: 0,
             object_type: "Temperature".to_string(),
             sensor_type: "Analog".to_string(),
             sensor_type_id: "1000".to_string(),
@@ -188,7 +246,7 @@ mod tests {
         let data = String::from_utf8(wtr.into_inner().expect("Failed to get inner writer"))
             .expect("Failed to convert to string");
 
-        let expected_data = "id,name,objectType,sensorType,sensorTypeId,valueMapping\n247a4ad9-9d18-4bf4-b20b-a1d7d61b3971,Sensor 1,Temperature,Analog,1000,\"Low:0,High:1\"\n";
+        let expected_data = "id,name,objectInstance,objectType,sensorType,sensorTypeId,valueMapping\n247a4ad9-9d18-4bf4-b20b-a1d7d61b3971,Sensor 1,0,Temperature,Analog,1000,\"Low:0,High:1\"\n";
 
         assert_eq!(data, expected_data);
     }

@@ -5,9 +5,11 @@ use std::path::Path;
 
 use crate::hyperview::{
     api::{
-        add_bacnet_definition, add_or_update_numeric_sensor, get_bacnet_definition_list,
-        get_bacnet_non_numeric_sensors, get_bacnet_numeric_sensors, get_sensor_type_asset_type_map,
+        add_bacnet_definition, add_or_update_non_numeric_sensor, add_or_update_numeric_sensor,
+        get_bacnet_definition_list, get_bacnet_non_numeric_sensors, get_bacnet_numeric_sensors,
+        get_sensor_type_asset_type_map,
     },
+    api_data::BacnetIpNonNumericSensorExportWrapper,
     app_errors::AppError,
     cli::{
         get_config_path, get_debug_filter, handle_output_choice, AppArgs, AppConfig, LoaderCommands,
@@ -57,10 +59,14 @@ fn main() -> Result<()> {
 
         LoaderCommands::GetBacnetNonNumericSensors(options) => {
             let resp = get_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
+            let resp_export_do: Vec<BacnetIpNonNumericSensorExportWrapper> = resp
+                .into_iter()
+                .map(|s| BacnetIpNonNumericSensorExportWrapper(s))
+                .collect();
             let filename = &options.filename;
             let output_type = &options.output_type;
 
-            handle_output_choice(output_type.to_owned(), filename.to_owned(), resp)?;
+            handle_output_choice(output_type.to_owned(), filename.to_owned(), resp_export_do)?;
         }
 
         LoaderCommands::AddBacnetNumericSensor(options) => {
@@ -79,6 +85,28 @@ fn main() -> Result<()> {
             );
 
             add_or_update_numeric_sensor(&config, definition_id.to_owned(), filename.to_owned())?;
+        }
+
+        LoaderCommands::AddBacnetNonNumericSensor(options) => {
+            let filename = &options.filename;
+
+            if !Path::new(filename).exists() {
+                error!("Specified input file does not exists. exiting ...");
+                return Err(AppError::InputFileDoesNotExist.into());
+            }
+
+            let definition_id = &options.definition_id;
+
+            info!(
+                "Uploading numeric sensors using file: {}, for definition: {}",
+                filename, definition_id
+            );
+
+            add_or_update_non_numeric_sensor(
+                &config,
+                definition_id.to_owned(),
+                filename.to_owned(),
+            )?;
         }
 
         LoaderCommands::GetSensorTypes(options) => {
