@@ -243,7 +243,7 @@ pub fn add_or_update_non_numeric_sensor(
                 println!(
                     "Updating sensor with id: {} and name: {}",
                     u,
-                    serde_json::to_string_pretty(&sensor)?
+                    &sensor.name
                 );
 
                 let target_url = format!(
