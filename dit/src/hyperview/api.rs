@@ -190,7 +190,7 @@ pub fn add_or_update_numeric_sensor(
 
             Err(e) => {
                 if &sensor.name.len() > &0 && &sensor.id == &"".to_string() {
-                    println!("Adding new sensor");
+                    println!("Adding new sensor with name: {}", &sensor.name);
                     let target_url = format!(
                         "{}{}/bacnetIpNumericSensors/{}",
                         config.instance_url, BACNET_API_PREFIX, definition_id
@@ -265,7 +265,7 @@ pub fn add_or_update_non_numeric_sensor(
 
             Err(e) => {
                 if &sensor.name.len() > &0 && &sensor.id == &"".to_string() {
-                    println!("Adding new sensor");
+                    println!("Adding new sensor with name: {}", &sensor.name);
                     let target_url = format!(
                         "{}{}/bacnetIpNonNumericSensors/{}",
                         config.instance_url, BACNET_API_PREFIX, definition_id
