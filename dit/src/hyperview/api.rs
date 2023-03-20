@@ -240,11 +240,7 @@ pub fn add_or_update_non_numeric_sensor(
         match Uuid::try_parse(&sensor.id) {
             Ok(u) => {
                 // existing sensor with valid uuid
-                println!(
-                    "Updating sensor with id: {} and name: {}",
-                    u,
-                    &sensor.name
-                );
+                println!("Updating sensor with id: {} and name: {}", u, &sensor.name);
 
                 let target_url = format!(
                     "{}{}/bacnetIpNonNumericSensors/{}/{}",
