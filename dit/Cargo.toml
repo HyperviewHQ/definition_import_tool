@@ -3,7 +3,7 @@ name = "dit"
 version = "0.1.0"
 edition = "2021"
 authors = ["Hyperview Technologies Inc."]
-description = "A loader for BACnet and Modbus sensor definitions into Hyperview"
+description = "An import tool for BACnet and Modbus sensor definitions for Hyperview"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
