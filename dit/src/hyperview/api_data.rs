@@ -2,9 +2,15 @@ use serde::{ser::SerializeStruct, Deserialize, Serialize};
 use serde_with::{serde_as, DefaultOnError};
 use std::fmt;
 
+#[derive(Debug)]
+pub enum DefinitionType {
+    Bacnet,
+    Modbus,
+}
+
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct BacnetDefinition {
+pub struct Definition {
     pub id: String,
     pub name: String,
     #[serde(alias = "assetType")]
@@ -13,7 +19,7 @@ pub struct BacnetDefinition {
     pub associated_assets: usize,
 }
 
-impl fmt::Display for BacnetDefinition {
+impl fmt::Display for Definition {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,

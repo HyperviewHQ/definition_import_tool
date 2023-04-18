@@ -7,14 +7,25 @@ use uuid::Uuid;
 use super::{api_data::*, auth::get_auth_header, cli::AppConfig};
 
 const BACNET_API_PREFIX: &str = "/api/setting/bacnetIpDefinitions";
+const MODBUS_API_PREFIX: &str = "/api/setting/modbusTcpDefinitions";
 const SENSOR_TYPE_ASSET_TYPE: &str = "/api/setting/sensorTypeAssetType";
 
-pub fn get_bacnet_definition_list(config: &AppConfig) -> Result<Vec<BacnetDefinition>> {
+pub fn get_bacnet_definition_list(
+    config: &AppConfig,
+    definition_type: DefinitionType,
+) -> Result<Vec<Definition>> {
     // Get Authorization header for request
     let auth_header = get_auth_header(config)?;
 
     // format target
-    let target_url = format!("{}{}", config.instance_url, BACNET_API_PREFIX);
+    let target_url = match definition_type {
+        DefinitionType::Bacnet => {
+            format!("{}{}", config.instance_url, BACNET_API_PREFIX)
+        }
+        DefinitionType::Modbus => {
+            format!("{}{}", config.instance_url, MODBUS_API_PREFIX)
+        }
+    };
 
     // Start http client
     let req = reqwest::blocking::Client::new();
@@ -26,7 +37,7 @@ pub fn get_bacnet_definition_list(config: &AppConfig) -> Result<Vec<BacnetDefini
         .header(CONTENT_TYPE, "application/json")
         .header(ACCEPT, "application/json")
         .send()?
-        .json::<Vec<BacnetDefinition>>()?;
+        .json::<Vec<Definition>>()?;
 
     Ok(resp)
 }
@@ -102,7 +113,7 @@ pub fn add_bacnet_definition(
     let req = reqwest::blocking::Client::new();
 
     // Construct definition
-    let def = BacnetDefinition {
+    let def = Definition {
         name,
         asset_type,
         ..Default::default()

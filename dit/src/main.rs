@@ -9,7 +9,7 @@ use crate::hyperview::{
         get_bacnet_definition_list, get_bacnet_non_numeric_sensors, get_bacnet_numeric_sensors,
         get_sensor_type_asset_type_map,
     },
-    api_data::BacnetIpNonNumericSensorExportWrapper,
+    api_data::{BacnetIpNonNumericSensorExportWrapper, DefinitionType},
     app_errors::AppError,
     cli::{
         get_config_path, get_debug_filter, handle_output_choice, AppArgs, AppConfig, LoaderCommands,
@@ -34,7 +34,7 @@ fn main() -> Result<()> {
 
     match &args.command {
         LoaderCommands::GetBacnetDefinitions => {
-            let resp = get_bacnet_definition_list(&config)?;
+            let resp = get_bacnet_definition_list(&config, DefinitionType::Bacnet)?;
 
             for (i, d) in resp.iter().enumerate() {
                 println!("---- [{}] ----", i);
@@ -107,6 +107,15 @@ fn main() -> Result<()> {
                 definition_id.to_owned(),
                 filename.to_owned(),
             )?;
+        }
+
+        LoaderCommands::GetModbusDefinitions => {
+            let resp = get_bacnet_definition_list(&config, DefinitionType::Modbus)?;
+
+            for (i, d) in resp.iter().enumerate() {
+                println!("---- [{}] ----", i);
+                println!("{}\n", d);
+            }
         }
 
         LoaderCommands::GetSensorTypes(options) => {

@@ -87,6 +87,9 @@ pub enum LoaderCommands {
     /// Adds non-numeric sensors to a definition
     AddBacnetNonNumericSensor(AddSensorArgs),
 
+    /// List current Modbus definitions
+    GetModbusDefinitions,
+
     /// Get sensor types compatible with an asset type
     GetSensorTypes(GetSensorTypesArgs),
 }
