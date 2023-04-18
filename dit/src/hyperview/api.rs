@@ -102,12 +102,20 @@ pub fn add_bacnet_definition(
     config: &AppConfig,
     name: String,
     asset_type: String,
+    definition_type: DefinitionType
 ) -> Result<Value> {
     // Get Authorization header for request
     let auth_header = get_auth_header(config)?;
 
     // format target
-    let target_url = format!("{}{}", config.instance_url, BACNET_API_PREFIX);
+    let target_url = match definition_type {
+        DefinitionType::Bacnet => {
+            format!("{}{}", config.instance_url, BACNET_API_PREFIX)
+        }
+        DefinitionType::Modbus => {
+            format!("{}{}", config.instance_url, MODBUS_API_PREFIX)
+        }
+    };
 
     // Start http client
     let req = reqwest::blocking::Client::new();

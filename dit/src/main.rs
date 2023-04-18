@@ -44,7 +44,7 @@ fn main() -> Result<()> {
 
         LoaderCommands::AddBacnetDefinition(options) => {
             let resp =
-                add_bacnet_definition(&config, options.name.clone(), options.asset_type.clone())?;
+                add_bacnet_definition(&config, options.name.clone(), options.asset_type.clone(), DefinitionType::Bacnet)?;
 
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
@@ -116,6 +116,13 @@ fn main() -> Result<()> {
                 println!("---- [{}] ----", i);
                 println!("{}\n", d);
             }
+        }
+
+        LoaderCommands::AddModbusDefinition(options) => {
+            let resp =
+                add_bacnet_definition(&config, options.name.clone(), options.asset_type.clone(), DefinitionType::Modbus)?;
+
+            println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
 
         LoaderCommands::GetSensorTypes(options) => {

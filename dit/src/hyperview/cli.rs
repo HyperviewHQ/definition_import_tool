@@ -73,7 +73,7 @@ pub enum LoaderCommands {
     GetBacnetDefinitions,
 
     /// Add a new BACnet definition
-    AddBacnetDefinition(AddBacnetDefinitionArgs),
+    AddBacnetDefinition(AddDefinitionArgs),
 
     /// Get a list of existing numeric sensors for a specific definition
     GetBacnetNumericSensors(GetSensorsArgs),
@@ -90,12 +90,15 @@ pub enum LoaderCommands {
     /// List current Modbus definitions
     GetModbusDefinitions,
 
+    /// Add a new Modbus definition
+    AddModbusDefinition(AddDefinitionArgs),
+
     /// Get sensor types compatible with an asset type
     GetSensorTypes(GetSensorTypesArgs),
 }
 
 #[derive(Args)]
-pub struct AddBacnetDefinitionArgs {
+pub struct AddDefinitionArgs {
     #[arg(short, long, help = "Definition name")]
     pub name: String,
 
