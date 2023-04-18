@@ -102,7 +102,7 @@ pub fn add_bacnet_definition(
     config: &AppConfig,
     name: String,
     asset_type: String,
-    definition_type: DefinitionType
+    definition_type: DefinitionType,
 ) -> Result<Value> {
     // Get Authorization header for request
     let auth_header = get_auth_header(config)?;
@@ -178,11 +178,7 @@ pub fn add_or_update_numeric_sensor(
 
     let mut reader = csv::Reader::from_path(filename)?;
 
-    while let Some(Ok(sensor)) = reader
-        .deserialize::<BacnetIpNumericSensor>()
-        .into_iter()
-        .next()
-    {
+    while let Some(Ok(sensor)) = reader.deserialize::<BacnetIpNumericSensor>().next() {
         info!("Processing input line: {:?}", sensor);
 
         match Uuid::try_parse(&sensor.id) {
@@ -208,7 +204,7 @@ pub fn add_or_update_numeric_sensor(
             }
 
             Err(e) => {
-                if &sensor.name.len() > &0 && &sensor.id == &"".to_string() {
+                if !sensor.name.is_empty() && sensor.id.is_empty() {
                     println!("Adding new sensor with name: {}", &sensor.name);
                     let target_url = format!(
                         "{}{}/bacnetIpNumericSensors/{}",
@@ -248,11 +244,7 @@ pub fn add_or_update_non_numeric_sensor(
 
     let mut reader = csv::Reader::from_path(filename)?;
 
-    while let Some(Ok(sensor_csv)) = reader
-        .deserialize::<BacnetIpNonNumericSersorCsv>()
-        .into_iter()
-        .next()
-    {
+    while let Some(Ok(sensor_csv)) = reader.deserialize::<BacnetIpNonNumericSersorCsv>().next() {
         info!("Processing input line: {:?}", sensor_csv);
         let sensor: BacnetIpNonNumericSensor = sensor_csv.into();
 
@@ -279,7 +271,7 @@ pub fn add_or_update_non_numeric_sensor(
             }
 
             Err(e) => {
-                if &sensor.name.len() > &0 && &sensor.id == &"".to_string() {
+                if !sensor.name.is_empty() && sensor.id.is_empty() {
                     println!("Adding new sensor with name: {}", &sensor.name);
                     let target_url = format!(
                         "{}{}/bacnetIpNonNumericSensors/{}",

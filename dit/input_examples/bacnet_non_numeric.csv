@@ -1,4 +1,4 @@
 id,name,objectInstance,objectType,sensorType,sensorTypeId,valueMapping
-974ee737-376f-4247-ac8b-f3b45dc3a19c,Clogged filter 1,0,analogInput,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
-3defcba0-4265-4db5-859d-dd6766b4f640,Compressor Active 1,1,analogValue,compressorActive,dd3aff52-a4bc-482a-b625-bffc63aa9d54,"Inactive:0,Active:1,Error:2"
+,Clogged filter 1,0,analogInput,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
+,Compressor Active 1,1,analogValue,compressorActive,dd3aff52-a4bc-482a-b625-bffc63aa9d54,"Inactive:0,Active:1,Error:2"
 ,Compressor Active 2,2,analogValue,compressorActive,dd3aff52-a4bc-482a-b625-bffc63aa9d54,"Inactive:0,Active:1,Error:2"

@@ -43,8 +43,12 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::AddBacnetDefinition(options) => {
-            let resp =
-                add_bacnet_definition(&config, options.name.clone(), options.asset_type.clone(), DefinitionType::Bacnet)?;
+            let resp = add_bacnet_definition(
+                &config,
+                options.name.clone(),
+                options.asset_type.clone(),
+                DefinitionType::Bacnet,
+            )?;
 
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
@@ -61,7 +65,7 @@ fn main() -> Result<()> {
             let resp = get_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
             let resp_export_do: Vec<BacnetIpNonNumericSensorExportWrapper> = resp
                 .into_iter()
-                .map(|s| BacnetIpNonNumericSensorExportWrapper(s))
+                .map(BacnetIpNonNumericSensorExportWrapper)
                 .collect();
             let filename = &options.filename;
             let output_type = &options.output_type;
@@ -119,8 +123,12 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::AddModbusDefinition(options) => {
-            let resp =
-                add_bacnet_definition(&config, options.name.clone(), options.asset_type.clone(), DefinitionType::Modbus)?;
+            let resp = add_bacnet_definition(
+                &config,
+                options.name.clone(),
+                options.asset_type.clone(),
+                DefinitionType::Modbus,
+            )?;
 
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }

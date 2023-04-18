@@ -181,19 +181,17 @@ pub fn handle_output_choice<T: Display + Serialize>(
     filename: Option<String>,
     resp: Vec<T>,
 ) -> Result<()> {
-    if output_type == "csv".to_string() {
-        if let None = filename {
+    if output_type == *"csv" {
+        if filename.is_none() {
             error!("Must provide a filename. exiting ...");
             return Err(AppError::NoOutputFilename.into());
-        } else {
-            if let Some(f) = filename {
-                if Path::new(&f).exists() {
-                    error!("Specified file already exists. exiting ...");
-                    return Err(AppError::FileExists.into());
-                }
-
-                write_output(f, resp)?;
+        } else if let Some(f) = filename {
+            if Path::new(&f).exists() {
+                error!("Specified file already exists. exiting ...");
+                return Err(AppError::FileExists.into());
             }
+
+            write_output(f, resp)?;
         }
     } else {
         for (i, s) in resp.iter().enumerate() {
