@@ -50,10 +50,10 @@ pub struct BacnetIpNumericSensor {
     #[serde(alias = "sensorTypeId")]
     sensor_type_id: String,
     #[serde_as(deserialize_as = "DefaultOnError")]
-    unit: String,
+    pub unit: Option<String>,
     #[serde(alias = "unitId")]
     #[serde_as(deserialize_as = "DefaultOnError")]
-    unit_id: String,
+    pub unit_id: Option<String>,
 }
 
 impl fmt::Display for BacnetIpNumericSensor {
@@ -63,10 +63,20 @@ impl fmt::Display for BacnetIpNumericSensor {
             None => String::new(),
         };
 
+        let unit = match self.unit.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
+        let unit_id = match self.unit_id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
         write!(
             f,
             "id: {}\nname: {}\nmultiplier: {}\nobject_instance: {}\nobject_type: {}\nsensor type: {}\nsensor type id: {}\nunit: {}\nunit id: {}",
-            id, self.name, self.multiplier, self.object_instance, self.object_type, self.sensor_type, self.sensor_type_id, self.unit, self.unit_id
+            id, self.name, self.multiplier, self.object_instance, self.object_type, self.sensor_type, self.sensor_type_id, unit, unit_id
         )
     }
 }

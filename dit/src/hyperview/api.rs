@@ -178,13 +178,21 @@ pub fn add_or_update_numeric_sensor(
 
     let mut reader = csv::Reader::from_path(filename)?;
 
-    while let Some(Ok(sensor)) = reader.deserialize::<BacnetIpNumericSensor>().next() {
+    while let Some(Ok(mut sensor)) = reader.deserialize::<BacnetIpNumericSensor>().next() {
         info!("Processing input line: {:?}", sensor);
 
         let id = match sensor.id.clone() {
             Some(x) => x,
             None => String::new(),
         };
+
+        if sensor.unit_id == Some("".to_string()) {
+            sensor.unit_id = None;
+        }
+
+        if sensor.unit == Some("".to_string()) {
+            sensor.unit = None;
+        }
 
         match Uuid::try_parse(&id) {
             Ok(u) => {
