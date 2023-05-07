@@ -259,9 +259,18 @@ pub fn add_or_update_non_numeric_sensor(
 
     while let Some(Ok(sensor_csv)) = reader.deserialize::<BacnetIpNonNumericSersorCsv>().next() {
         info!("Processing input line: {:?}", sensor_csv);
-        let sensor: BacnetIpNonNumericSensor = sensor_csv.into();
+        let mut sensor: BacnetIpNonNumericSensor = sensor_csv.into();
 
-        match Uuid::try_parse(&sensor.id) {
+        let id = match sensor.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
+        if String::is_empty(&id) {
+            sensor.id = None;
+        }
+
+        match Uuid::try_parse(&id) {
             Ok(u) => {
                 // existing sensor with valid uuid
                 println!("Updating sensor with id: {} and name: {}", u, &sensor.name);
@@ -278,13 +287,13 @@ pub fn add_or_update_non_numeric_sensor(
                     .header(ACCEPT, "application/json")
                     .json(&sensor)
                     .send()?
-                    .status();
+                    .json::<Value>();
 
                 println!("server respone: {:#?}", resp);
             }
 
             Err(e) => {
-                if !sensor.name.is_empty() && sensor.id.is_empty() {
+                if !sensor.name.is_empty() && id.is_empty() {
                     println!("Adding new sensor with name: {}", &sensor.name);
                     let target_url = format!(
                         "{}{}/bacnetIpNonNumericSensors/{}",
@@ -298,7 +307,7 @@ pub fn add_or_update_non_numeric_sensor(
                         .header(ACCEPT, "application/json")
                         .json(&sensor)
                         .send()?
-                        .status();
+                        .json::<Value>();
 
                     println!("server respone: {:#?}", resp);
                 } else {

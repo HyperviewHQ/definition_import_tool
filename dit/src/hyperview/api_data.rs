@@ -147,7 +147,7 @@ pub struct BacnetIpNonNumericSersorCsv {
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BacnetIpNonNumericSensor {
-    pub id: String,
+    pub id: Option<String>,
     pub name: String,
     #[serde(alias = "objectInstance")]
     object_instance: usize,
@@ -163,9 +163,14 @@ pub struct BacnetIpNonNumericSensor {
 
 impl fmt::Display for BacnetIpNonNumericSensor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let id = match self.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
         let sensor_header = format!(
             "id: {}\nname: {}\nobject type: {}\nsensor type: {}\nsensor type id: {}",
-            self.id, self.name, self.object_type, self.sensor_type, self.sensor_type_id
+            id, self.name, self.object_type, self.sensor_type, self.sensor_type_id
         );
         let sensor_value_mapping = &self
             .value_mapping
@@ -230,7 +235,7 @@ impl From<BacnetIpNonNumericSersorCsv> for BacnetIpNonNumericSensor {
             .collect();
 
         BacnetIpNonNumericSensor {
-            id: source.id,
+            id: Some(source.id),
             name: source.name,
             object_instance: source.object_instance,
             object_type: source.object_type,
