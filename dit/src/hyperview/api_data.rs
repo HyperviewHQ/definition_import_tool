@@ -11,7 +11,7 @@ pub enum DefinitionType {
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Definition {
-    pub id: String,
+    pub id: Option<String>,
     pub name: String,
     #[serde(alias = "assetType")]
     pub asset_type: String,
@@ -21,10 +21,15 @@ pub struct Definition {
 
 impl fmt::Display for Definition {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let id = match self.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
         write!(
             f,
             "id: {}\nname: {}\nasset type: {}\nassociated_assets: {}",
-            self.id, self.name, self.asset_type, self.associated_assets
+            id, self.name, self.asset_type, self.associated_assets
         )
     }
 }
@@ -33,7 +38,7 @@ impl fmt::Display for Definition {
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BacnetIpNumericSensor {
-    pub id: String,
+    pub id: Option<String>,
     pub name: String,
     multiplier: f64,
     #[serde(alias = "objectInstance")]
@@ -53,10 +58,15 @@ pub struct BacnetIpNumericSensor {
 
 impl fmt::Display for BacnetIpNumericSensor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let id = match self.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
         write!(
             f,
             "id: {}\nname: {}\nmultiplier: {}\nobject_instance: {}\nobject_type: {}\nsensor type: {}\nsensor type id: {}\nunit: {}\nunit id: {}",
-            self.id, self.name, self.multiplier, self.object_instance, self.object_type, self.sensor_type, self.sensor_type_id, self.unit, self.unit_id
+            id, self.name, self.multiplier, self.object_instance, self.object_type, self.sensor_type, self.sensor_type_id, self.unit, self.unit_id
         )
     }
 }

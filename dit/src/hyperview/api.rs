@@ -181,7 +181,12 @@ pub fn add_or_update_numeric_sensor(
     while let Some(Ok(sensor)) = reader.deserialize::<BacnetIpNumericSensor>().next() {
         info!("Processing input line: {:?}", sensor);
 
-        match Uuid::try_parse(&sensor.id) {
+        let id = match sensor.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
+        match Uuid::try_parse(&id) {
             Ok(u) => {
                 // existing sensor with valid uuid
                 println!("Updating sensor with id: {} and name: {}", u, &sensor.name);
@@ -198,13 +203,13 @@ pub fn add_or_update_numeric_sensor(
                     .header(ACCEPT, "application/json")
                     .json(&sensor)
                     .send()?
-                    .status();
+                    .json::<Value>();
 
                 println!("server respone: {:#?}", resp);
             }
 
             Err(e) => {
-                if !sensor.name.is_empty() && sensor.id.is_empty() {
+                if !sensor.name.is_empty() && id.is_empty() {
                     println!("Adding new sensor with name: {}", &sensor.name);
                     let target_url = format!(
                         "{}{}/bacnetIpNumericSensors/{}",
@@ -218,7 +223,7 @@ pub fn add_or_update_numeric_sensor(
                         .header(ACCEPT, "application/json")
                         .json(&sensor)
                         .send()?
-                        .status();
+                        .json::<Value>();
 
                     println!("server respone: {:#?}", resp);
                 } else {
