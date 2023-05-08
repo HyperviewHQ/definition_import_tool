@@ -33,7 +33,7 @@ fn main() -> Result<()> {
     info!("Hyperview Instance: {}", config.instance_url);
 
     match &args.command {
-        LoaderCommands::GetBacnetDefinitions => {
+        LoaderCommands::ListBacnetDefinitions => {
             let resp = get_bacnet_definition_list(&config, DefinitionType::Bacnet)?;
 
             for (i, d) in resp.iter().enumerate() {
@@ -53,7 +53,7 @@ fn main() -> Result<()> {
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
 
-        LoaderCommands::GetBacnetNumericSensors(options) => {
+        LoaderCommands::ListBacnetNumericSensors(options) => {
             let resp = get_bacnet_numeric_sensors(&config, options.definition_id.clone())?;
             let filename = &options.filename;
             let output_type = &options.output_type;
@@ -61,7 +61,7 @@ fn main() -> Result<()> {
             handle_output_choice(output_type.to_owned(), filename.to_owned(), resp)?;
         }
 
-        LoaderCommands::GetBacnetNonNumericSensors(options) => {
+        LoaderCommands::ListBacnetNonNumericSensors(options) => {
             let resp = get_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
             let resp_export_do: Vec<BacnetIpNonNumericSensorExportWrapper> = resp
                 .into_iter()
@@ -73,7 +73,7 @@ fn main() -> Result<()> {
             handle_output_choice(output_type.to_owned(), filename.to_owned(), resp_export_do)?;
         }
 
-        LoaderCommands::AddBacnetNumericSensor(options) => {
+        LoaderCommands::ImportBacnetNumericSensors(options) => {
             let filename = &options.filename;
 
             if !Path::new(filename).exists() {
@@ -91,7 +91,7 @@ fn main() -> Result<()> {
             add_or_update_numeric_sensor(&config, definition_id.to_owned(), filename.to_owned())?;
         }
 
-        LoaderCommands::AddBacnetNonNumericSensor(options) => {
+        LoaderCommands::ImportBacnetNonNumericSensors(options) => {
             let filename = &options.filename;
 
             if !Path::new(filename).exists() {
@@ -113,7 +113,7 @@ fn main() -> Result<()> {
             )?;
         }
 
-        LoaderCommands::GetModbusDefinitions => {
+        LoaderCommands::ListModbusDefinitions => {
             let resp = get_bacnet_definition_list(&config, DefinitionType::Modbus)?;
 
             for (i, d) in resp.iter().enumerate() {
@@ -133,7 +133,7 @@ fn main() -> Result<()> {
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
 
-        LoaderCommands::GetSensorTypes(options) => {
+        LoaderCommands::ListSensorTypes(options) => {
             let query = vec![
                 ("assetTypeId".to_string(), options.asset_type.clone()),
                 (
