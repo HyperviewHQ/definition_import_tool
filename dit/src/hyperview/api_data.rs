@@ -252,8 +252,8 @@ mod tests {
 
     #[test]
     fn test_sensor_csv_serialization() {
-        let sensor = BacnetIpNonNumericSensor {
-            id: "247a4ad9-9d18-4bf4-b20b-a1d7d61b3971".to_string(),
+        let sensor = BacnetIpNonNumericSensorExportWrapper( BacnetIpNonNumericSensor {
+            id: Some("247a4ad9-9d18-4bf4-b20b-a1d7d61b3971".to_string()),
             name: "Sensor 1".to_string(),
             object_instance: 0,
             object_type: "Temperature".to_string(),
@@ -269,7 +269,7 @@ mod tests {
                     value: 1,
                 },
             ],
-        };
+        });
 
         let mut wtr = csv::Writer::from_writer(vec![]);
         wtr.serialize(&sensor).expect("Failed to serialize sensor");
