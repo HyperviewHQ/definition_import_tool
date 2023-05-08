@@ -75,10 +75,10 @@ pub enum LoaderCommands {
     /// Add a new BACnet definition
     AddBacnetDefinition(AddDefinitionArgs),
 
-    /// List numeric sensors for a specific definition
+    /// List numeric sensors for a definition
     ListBacnetNumericSensors(ListSensorsArgs),
 
-    /// List non-numeric sensors for a specific definition
+    /// List non-numeric sensors for a definition
     ListBacnetNonNumericSensors(ListSensorsArgs),
 
     /// Import numeric sensors to a definition
