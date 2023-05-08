@@ -5,9 +5,9 @@ use std::path::Path;
 
 use crate::hyperview::{
     api::{
-        add_bacnet_definition, add_or_update_non_numeric_sensor, add_or_update_numeric_sensor,
-        get_bacnet_definition_list, get_bacnet_non_numeric_sensors, get_bacnet_numeric_sensors,
-        get_sensor_type_asset_type_map,
+        add_bacnet_definition, import_non_numeric_sensors, import_numeric_sensors,
+        list_bacnet_non_numeric_sensors, list_bacnet_numeric_sensors, list_definitions,
+        list_sensor_types,
     },
     api_data::{BacnetIpNonNumericSensorExportWrapper, DefinitionType},
     app_errors::AppError,
@@ -34,7 +34,7 @@ fn main() -> Result<()> {
 
     match &args.command {
         LoaderCommands::ListBacnetDefinitions => {
-            let resp = get_bacnet_definition_list(&config, DefinitionType::Bacnet)?;
+            let resp = list_definitions(&config, DefinitionType::Bacnet)?;
 
             for (i, d) in resp.iter().enumerate() {
                 println!("---- [{}] ----", i);
@@ -54,7 +54,7 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::ListBacnetNumericSensors(options) => {
-            let resp = get_bacnet_numeric_sensors(&config, options.definition_id.clone())?;
+            let resp = list_bacnet_numeric_sensors(&config, options.definition_id.clone())?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 
@@ -62,7 +62,7 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::ListBacnetNonNumericSensors(options) => {
-            let resp = get_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
+            let resp = list_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
             let resp_export_do: Vec<BacnetIpNonNumericSensorExportWrapper> = resp
                 .into_iter()
                 .map(BacnetIpNonNumericSensorExportWrapper)
@@ -88,7 +88,7 @@ fn main() -> Result<()> {
                 filename, definition_id
             );
 
-            add_or_update_numeric_sensor(&config, definition_id.to_owned(), filename.to_owned())?;
+            import_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
         }
 
         LoaderCommands::ImportBacnetNonNumericSensors(options) => {
@@ -106,15 +106,11 @@ fn main() -> Result<()> {
                 filename, definition_id
             );
 
-            add_or_update_non_numeric_sensor(
-                &config,
-                definition_id.to_owned(),
-                filename.to_owned(),
-            )?;
+            import_non_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
         }
 
         LoaderCommands::ListModbusDefinitions => {
-            let resp = get_bacnet_definition_list(&config, DefinitionType::Modbus)?;
+            let resp = list_definitions(&config, DefinitionType::Modbus)?;
 
             for (i, d) in resp.iter().enumerate() {
                 println!("---- [{}] ----", i);
@@ -142,7 +138,7 @@ fn main() -> Result<()> {
                 ),
             ];
 
-            let resp = get_sensor_type_asset_type_map(&config, query)?;
+            let resp = list_sensor_types(&config, query)?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 

@@ -246,13 +246,61 @@ impl fmt::Display for SensorType {
     }
 }
 
+#[serde_as]
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModbusTcpNumericSensor {
+    pub id: Option<String>,
+    pub name: String,
+    multiplier: f64,
+    address: usize,
+    #[serde(alias = "registerType")]
+    register_type: String,
+    #[serde(alias = "dataSetting")]
+    data_setting: String,
+    #[serde(alias = "sensorType")]
+    sensor_type: String,
+    #[serde(alias = "sensorTypeId")]
+    sensor_type_id: String,
+    #[serde_as(deserialize_as = "DefaultOnError")]
+    pub unit: Option<String>,
+    #[serde(alias = "unitId")]
+    #[serde_as(deserialize_as = "DefaultOnError")]
+    pub unit_id: Option<String>,
+}
+
+impl fmt::Display for ModbusTcpNumericSensor {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let id = match self.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
+        let unit = match self.unit.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
+        let unit_id = match self.unit_id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
+        write!(
+            f,
+            "id: {}\nname: {}\nmultiplier: {}\naddress: {}\nregister_type: {}\ndata setting: {}\nsensor type: {}\nsensor type id: {}\nunit: {}\nunit id: {}",
+            id, self.name, self.multiplier, self.address, self.register_type, self.data_setting, self.sensor_type, self.sensor_type_id, unit, unit_id
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_sensor_csv_serialization() {
-        let sensor = BacnetIpNonNumericSensorExportWrapper( BacnetIpNonNumericSensor {
+        let sensor = BacnetIpNonNumericSensorExportWrapper(BacnetIpNonNumericSensor {
             id: Some("247a4ad9-9d18-4bf4-b20b-a1d7d61b3971".to_string()),
             name: "Sensor 1".to_string(),
             object_instance: 0,

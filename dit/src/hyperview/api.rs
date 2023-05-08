@@ -10,7 +10,7 @@ const BACNET_API_PREFIX: &str = "/api/setting/bacnetIpDefinitions";
 const MODBUS_API_PREFIX: &str = "/api/setting/modbusTcpDefinitions";
 const SENSOR_TYPE_ASSET_TYPE: &str = "/api/setting/sensorTypeAssetType";
 
-pub fn get_bacnet_definition_list(
+pub fn list_definitions(
     config: &AppConfig,
     definition_type: DefinitionType,
 ) -> Result<Vec<Definition>> {
@@ -42,7 +42,7 @@ pub fn get_bacnet_definition_list(
     Ok(resp)
 }
 
-pub fn get_bacnet_numeric_sensors(
+pub fn list_bacnet_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
 ) -> Result<Vec<BacnetIpNumericSensor>> {
@@ -70,7 +70,7 @@ pub fn get_bacnet_numeric_sensors(
     Ok(resp)
 }
 
-pub fn get_bacnet_non_numeric_sensors(
+pub fn list_bacnet_non_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
 ) -> Result<Vec<BacnetIpNonNumericSensor>> {
@@ -139,7 +139,7 @@ pub fn add_bacnet_definition(
     Ok(resp)
 }
 
-pub fn get_sensor_type_asset_type_map(
+pub fn list_sensor_types(
     config: &AppConfig,
     query: Vec<(String, String)>,
 ) -> Result<Vec<SensorType>> {
@@ -165,7 +165,7 @@ pub fn get_sensor_type_asset_type_map(
     Ok(resp)
 }
 
-pub fn add_or_update_numeric_sensor(
+pub fn import_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
@@ -244,7 +244,7 @@ pub fn add_or_update_numeric_sensor(
     Ok(())
 }
 
-pub fn add_or_update_non_numeric_sensor(
+pub fn import_non_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
