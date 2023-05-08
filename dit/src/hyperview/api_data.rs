@@ -81,41 +81,6 @@ impl fmt::Display for BacnetIpNumericSensor {
     }
 }
 
-#[serde_as]
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub struct SensorType {
-    #[serde(alias = "abbreviatedUnit")]
-    #[serde_as(deserialize_as = "DefaultOnError")]
-    _abbreviated_unit: String,
-    #[serde(alias = "isManuallyCreatable")]
-    _is_manually_creatable: bool,
-    #[serde(alias = "minimumValidValue")]
-    #[serde_as(deserialize_as = "DefaultOnError")]
-    _minimum_valid_value: String,
-    #[serde(alias = "sensorDescription")]
-    sensor_description: String,
-    #[serde(alias = "sensorParentType")]
-    _sensor_parent_type: String,
-    #[serde(alias = "sensorTypeId")]
-    sensor_type_id: String,
-    #[serde(alias = "unitDescription")]
-    #[serde_as(deserialize_as = "DefaultOnError")]
-    unit_description: String,
-    #[serde(alias = "unitId")]
-    #[serde_as(deserialize_as = "DefaultOnError")]
-    unit_id: String,
-}
-
-impl fmt::Display for SensorType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "id: {}\ndiscription: {}\nunit id: {}\nunit: {}",
-            self.sensor_type_id, self.sensor_description, self.unit_id, self.unit_description
-        )
-    }
-}
-
 #[derive(Debug, Serialize, Deserialize)]
 struct ValueMapping {
     text: String,
@@ -243,6 +208,41 @@ impl From<BacnetIpNonNumericSersorCsv> for BacnetIpNonNumericSensor {
             sensor_type_id: source.sensor_type_id,
             value_mapping: mappings,
         }
+    }
+}
+
+#[serde_as]
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct SensorType {
+    #[serde(alias = "abbreviatedUnit")]
+    #[serde_as(deserialize_as = "DefaultOnError")]
+    _abbreviated_unit: String,
+    #[serde(alias = "isManuallyCreatable")]
+    _is_manually_creatable: bool,
+    #[serde(alias = "minimumValidValue")]
+    #[serde_as(deserialize_as = "DefaultOnError")]
+    _minimum_valid_value: String,
+    #[serde(alias = "sensorDescription")]
+    sensor_description: String,
+    #[serde(alias = "sensorParentType")]
+    _sensor_parent_type: String,
+    #[serde(alias = "sensorTypeId")]
+    sensor_type_id: String,
+    #[serde(alias = "unitDescription")]
+    #[serde_as(deserialize_as = "DefaultOnError")]
+    unit_description: String,
+    #[serde(alias = "unitId")]
+    #[serde_as(deserialize_as = "DefaultOnError")]
+    unit_id: String,
+}
+
+impl fmt::Display for SensorType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "id: {}\ndiscription: {}\nunit id: {}\nunit: {}",
+            self.sensor_type_id, self.sensor_description, self.unit_id, self.unit_description
+        )
     }
 }
 
