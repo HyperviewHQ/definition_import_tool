@@ -93,6 +93,9 @@ pub enum LoaderCommands {
     /// Add a new Modbus definition
     AddModbusDefinition(AddDefinitionArgs),
 
+    /// List numeric sensors for a definition
+    ListModbusNumericSensors(ListSensorsArgs),
+
     /// List sensor types compatible with an asset type
     ListSensorTypes(ListSensorTypesArgs),
 }

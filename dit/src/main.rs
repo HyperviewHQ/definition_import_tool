@@ -5,9 +5,9 @@ use std::path::Path;
 
 use crate::hyperview::{
     api::{
-        add_bacnet_definition, import_non_numeric_sensors, import_numeric_sensors,
+        add_bacnet_definition, import_bacnet_non_numeric_sensors, import_bacnet_numeric_sensors,
         list_bacnet_non_numeric_sensors, list_bacnet_numeric_sensors, list_definitions,
-        list_sensor_types,
+        list_sensor_types, list_modbus_numeric_sensors,
     },
     api_data::{BacnetIpNonNumericSensorExportWrapper, DefinitionType},
     app_errors::AppError,
@@ -88,7 +88,7 @@ fn main() -> Result<()> {
                 filename, definition_id
             );
 
-            import_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
+            import_bacnet_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
         }
 
         LoaderCommands::ImportBacnetNonNumericSensors(options) => {
@@ -106,7 +106,7 @@ fn main() -> Result<()> {
                 filename, definition_id
             );
 
-            import_non_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
+            import_bacnet_non_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
         }
 
         LoaderCommands::ListModbusDefinitions => {
@@ -127,6 +127,14 @@ fn main() -> Result<()> {
             )?;
 
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
+        }
+
+        LoaderCommands::ListModbusNumericSensors(options) => {
+            let resp = list_modbus_numeric_sensors(&config, options.definition_id.clone())?;
+            let filename = &options.filename;
+            let output_type = &options.output_type;
+
+            handle_output_choice(output_type.to_owned(), filename.to_owned(), resp)?;
         }
 
         LoaderCommands::ListSensorTypes(options) => {

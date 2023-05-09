@@ -70,6 +70,34 @@ pub fn list_bacnet_numeric_sensors(
     Ok(resp)
 }
 
+pub fn list_modbus_numeric_sensors(
+    config: &AppConfig,
+    definition_id: String,
+) -> Result<Vec<ModbusTcpNumericSensor>> {
+    // Get Authorization header for request
+    let auth_header = get_auth_header(config)?;
+
+    // format target
+    let target_url = format!(
+        "{}{}/modbusTcpNumericSensors/{}",
+        config.instance_url, MODBUS_API_PREFIX, definition_id
+    );
+
+    // Start http client
+    let req = reqwest::blocking::Client::new();
+
+    // Get response
+    let resp = req
+        .get(target_url)
+        .header(AUTHORIZATION, auth_header)
+        .header(CONTENT_TYPE, "application/json")
+        .header(ACCEPT, "application/json")
+        .send()?
+        .json::<Vec<ModbusTcpNumericSensor>>()?;
+
+    Ok(resp)
+}
+
 pub fn list_bacnet_non_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
@@ -165,7 +193,7 @@ pub fn list_sensor_types(
     Ok(resp)
 }
 
-pub fn import_numeric_sensors(
+pub fn import_bacnet_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
@@ -244,7 +272,7 @@ pub fn import_numeric_sensors(
     Ok(())
 }
 
-pub fn import_non_numeric_sensors(
+pub fn import_bacnet_non_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
