@@ -7,9 +7,12 @@ use crate::hyperview::{
     api::{
         add_bacnet_definition, import_bacnet_non_numeric_sensors, import_bacnet_numeric_sensors,
         list_bacnet_non_numeric_sensors, list_bacnet_numeric_sensors, list_definitions,
-        list_sensor_types, list_modbus_numeric_sensors,
+        list_modbus_non_numeric_sensors, list_modbus_numeric_sensors, list_sensor_types,
     },
-    api_data::{BacnetIpNonNumericSensorExportWrapper, DefinitionType},
+    api_data::{
+        BacnetIpNonNumericSensorExportWrapper, DefinitionType,
+        ModbusTcpNonNumericSensorExportWrapper,
+    },
     app_errors::AppError,
     cli::{
         get_config_path, get_debug_filter, handle_output_choice, AppArgs, AppConfig, LoaderCommands,
@@ -106,7 +109,11 @@ fn main() -> Result<()> {
                 filename, definition_id
             );
 
-            import_bacnet_non_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
+            import_bacnet_non_numeric_sensors(
+                &config,
+                definition_id.to_owned(),
+                filename.to_owned(),
+            )?;
         }
 
         LoaderCommands::ListModbusDefinitions => {
@@ -138,10 +145,10 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::ListModbusNonNumericSensors(options) => {
-            let resp = list_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
-            let resp_export_do: Vec<BacnetIpNonNumericSensorExportWrapper> = resp
+            let resp = list_modbus_non_numeric_sensors(&config, options.definition_id.clone())?;
+            let resp_export_do: Vec<ModbusTcpNonNumericSensorExportWrapper> = resp
                 .into_iter()
-                .map(BacnetIpNonNumericSensorExportWrapper)
+                .map(ModbusTcpNonNumericSensorExportWrapper)
                 .collect();
             let filename = &options.filename;
             let output_type = &options.output_type;

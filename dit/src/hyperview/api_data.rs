@@ -146,7 +146,7 @@ impl fmt::Display for BacnetIpNonNumericSensor {
     }
 }
 
-// The export wrapper is implemented because we have two potential serialization paths. 
+// The export wrapper is implemented because we have two potential serialization paths.
 // One for CSV export and another from the standard serde Serialize/De-Serialize funtionality
 pub struct BacnetIpNonNumericSensorExportWrapper(pub BacnetIpNonNumericSensor);
 
@@ -338,11 +338,11 @@ impl fmt::Display for ModbusTcpNonNumericSensor {
     }
 }
 
-// The export wrapper is implemented because we have two potential serialization paths. 
+// The export wrapper is implemented because we have two potential serialization paths.
 // One for CSV export and another from the standard serde Serialize/De-Serialize funtionality
 pub struct ModbusTcpNonNumericSensorExportWrapper(pub ModbusTcpNonNumericSensor);
 
-impl fmt::Display for ModbusTcpNonNumericSensorExportWrapper{
+impl fmt::Display for ModbusTcpNonNumericSensorExportWrapper {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.0)
     }
@@ -353,7 +353,8 @@ impl Serialize for ModbusTcpNonNumericSensorExportWrapper {
     where
         S: serde::Serializer,
     {
-        let mut state = serializer.serialize_struct("ModbusTcpNonNumericSensorExportWrapper", 10)?;
+        let mut state =
+            serializer.serialize_struct("ModbusTcpNonNumericSensorExportWrapper", 10)?;
 
         state.serialize_field("id", &self.0.id)?;
         state.serialize_field("name", &self.0.name)?;

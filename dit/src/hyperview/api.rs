@@ -126,6 +126,34 @@ pub fn list_bacnet_non_numeric_sensors(
     Ok(resp)
 }
 
+pub fn list_modbus_non_numeric_sensors(
+    config: &AppConfig,
+    definition_id: String,
+) -> Result<Vec<ModbusTcpNonNumericSensor>> {
+    // Get Authorization header for request
+    let auth_header = get_auth_header(config)?;
+
+    // format target
+    let target_url = format!(
+        "{}{}/modbusTcpNonNumericSensors/{}",
+        config.instance_url, MODBUS_API_PREFIX, definition_id
+    );
+
+    // Start http client
+    let req = reqwest::blocking::Client::new();
+
+    // Get response
+    let resp = req
+        .get(target_url)
+        .header(AUTHORIZATION, auth_header)
+        .header(CONTENT_TYPE, "application/json")
+        .header(ACCEPT, "application/json")
+        .send()?
+        .json::<Vec<ModbusTcpNonNumericSensor>>()?;
+
+    Ok(resp)
+}
+
 pub fn add_bacnet_definition(
     config: &AppConfig,
     name: String,
