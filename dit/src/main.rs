@@ -6,8 +6,9 @@ use std::path::Path;
 use crate::hyperview::{
     api::{
         add_bacnet_definition, import_bacnet_non_numeric_sensors, import_bacnet_numeric_sensors,
-        list_bacnet_non_numeric_sensors, list_bacnet_numeric_sensors, list_definitions,
-        list_modbus_non_numeric_sensors, list_modbus_numeric_sensors, list_sensor_types,
+        import_modbus_numeric_sensors, list_bacnet_non_numeric_sensors,
+        list_bacnet_numeric_sensors, list_definitions, list_modbus_non_numeric_sensors,
+        list_modbus_numeric_sensors, list_sensor_types,
     },
     api_data::{
         BacnetIpNonNumericSensorExportWrapper, DefinitionType,
@@ -154,6 +155,24 @@ fn main() -> Result<()> {
             let output_type = &options.output_type;
 
             handle_output_choice(output_type.to_owned(), filename.to_owned(), resp_export_do)?;
+        }
+
+        LoaderCommands::ImportModbusNumericSensors(options) => {
+            let filename = &options.filename;
+
+            if !Path::new(filename).exists() {
+                error!("Specified input file does not exists. exiting ...");
+                return Err(AppError::InputFileDoesNotExist.into());
+            }
+
+            let definition_id = &options.definition_id;
+
+            info!(
+                "Uploading numeric sensors using file: {}, for definition: {}",
+                filename, definition_id
+            );
+
+            import_modbus_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
         }
 
         LoaderCommands::ListSensorTypes(options) => {

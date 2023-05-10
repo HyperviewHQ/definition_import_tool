@@ -1,0 +1,9 @@
+id,name,multiplier,address,registerType,dataSetting,sensorType,sensorTypeId,unit,unitId
+182a32f8-b2ce-4c9d-a351-3d918d87009f,Compressor Runtime,1.0,1,inputRegister,uInteger16,compressorRuntime,ec5459cf-4ebc-42d8-bd5c-014cc263b0e1,Seconds,b09bf840-ae5f-4086-8bbc-a480c0d0c4ab
+a24fa9f8-2fc3-4ec7-8cb1-5d8ea656db2f,Compressor Temperature,1.0,2,inputRegister,uInteger16,compressorTemperature,47ab8d0c-b9f0-49b6-b7f6-84713fd18093,Celsius,d53e036e-a428-4c1a-b779-8322b96dfe16
+53bc66b8-cf56-442b-a2af-79ee2d5223dd,Cooling Load,1.0,3,holdingRegister,integer32BigEndian,coolingLoad,2706f099-43a2-41d0-a60d-4301dee6be47,%,95d6a851-86b3-4208-a033-778afb65a700
+d2fa3eca-dd18-42d8-bf66-637f333eee4e,Fan Speed,1.0,4,holdingRegister,uInteger32BigEndian,fanSpeed,416799ea-0e25-e211-8183-001c42e521d8,%,95d6a851-86b3-4208-a033-778afb65a700
+,Compressor Runtime,1.0,5,inputRegister,uInteger16,compressorRuntime,ec5459cf-4ebc-42d8-bd5c-014cc263b0e1,Seconds,b09bf840-ae5f-4086-8bbc-a480c0d0c4ab
+,Compressor Temperature,1.0,6,inputRegister,uInteger16,compressorTemperature,47ab8d0c-b9f0-49b6-b7f6-84713fd18093,Celsius,d53e036e-a428-4c1a-b779-8322b96dfe16
+,Cooling Load,1.0,7,holdingRegister,integer32BigEndian,coolingLoad,2706f099-43a2-41d0-a60d-4301dee6be47,%,95d6a851-86b3-4208-a033-778afb65a700
+,Fan Speed,1.0,8,holdingRegister,uInteger32BigEndian,fanSpeed,416799ea-0e25-e211-8183-001c42e521d8,%,95d6a851-86b3-4208-a033-778afb65a700

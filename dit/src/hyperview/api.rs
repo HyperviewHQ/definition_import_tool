@@ -267,9 +267,9 @@ pub fn import_bacnet_numeric_sensors(
                     .header(ACCEPT, "application/json")
                     .json(&sensor)
                     .send()?
-                    .json::<Value>();
+                    .json::<Value>()?;
 
-                println!("server respone: {:#?}", resp);
+                println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
             }
 
             Err(e) => {
@@ -287,9 +287,88 @@ pub fn import_bacnet_numeric_sensors(
                         .header(ACCEPT, "application/json")
                         .json(&sensor)
                         .send()?
-                        .json::<Value>();
+                        .json::<Value>()?;
 
-                    println!("server respone: {:#?}", resp);
+                    println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
+                } else {
+                    error!("Error parsing provided sensor id: {}", e);
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
+pub fn import_modbus_numeric_sensors(
+    config: &AppConfig,
+    definition_id: String,
+    filename: String,
+) -> Result<()> {
+    // Get Authorization header for request
+    let auth_header = get_auth_header(config)?;
+
+    // Start http client
+    let req = reqwest::blocking::Client::new();
+
+    let mut reader = csv::Reader::from_path(filename)?;
+
+    while let Some(Ok(mut sensor)) = reader.deserialize::<ModbusTcpNumericSensor>().next() {
+        info!("Processing input line: {:?}", sensor);
+
+        let id = match sensor.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
+        if sensor.unit_id == Some("".to_string()) {
+            sensor.unit_id = None;
+        }
+
+        if sensor.unit == Some("".to_string()) {
+            sensor.unit = None;
+        }
+
+        match Uuid::try_parse(&id) {
+            Ok(u) => {
+                // existing sensor with valid uuid
+                println!("Updating sensor with id: {} and name: {}", u, &sensor.name);
+
+                let target_url = format!(
+                    "{}{}/modbusTcpNumericSensors/{}/{}",
+                    config.instance_url, MODBUS_API_PREFIX, definition_id, u
+                );
+
+                let resp = req
+                    .put(target_url)
+                    .header(AUTHORIZATION, auth_header.clone())
+                    .header(CONTENT_TYPE, "application/json")
+                    .header(ACCEPT, "application/json")
+                    .json(&sensor)
+                    .send()?
+                    .json::<Value>()?;
+
+                println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
+            }
+
+            Err(e) => {
+                if !sensor.name.is_empty() && id.is_empty() {
+                    println!("Adding new sensor with name: {}", &sensor.name);
+                    let target_url = format!(
+                        "{}{}/modbusTcpNumericSensors/{}",
+                        config.instance_url, MODBUS_API_PREFIX, definition_id
+                    );
+
+                    let resp = req
+                        .post(target_url)
+                        .header(AUTHORIZATION, auth_header.clone())
+                        .header(CONTENT_TYPE, "application/json")
+                        .header(ACCEPT, "application/json")
+                        .json(&sensor)
+                        .send()?
+                        .json::<Value>()?;
+
+                    println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
                 } else {
                     error!("Error parsing provided sensor id: {}", e);
                 }
@@ -343,9 +422,10 @@ pub fn import_bacnet_non_numeric_sensors(
                     .header(ACCEPT, "application/json")
                     .json(&sensor)
                     .send()?
-                    .json::<Value>();
+                    .json::<Value>()?;
 
-                println!("server respone: {:#?}", resp);
+                //println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
+                println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
             }
 
             Err(e) => {
@@ -363,9 +443,9 @@ pub fn import_bacnet_non_numeric_sensors(
                         .header(ACCEPT, "application/json")
                         .json(&sensor)
                         .send()?
-                        .json::<Value>();
+                        .json::<Value>()?;
 
-                    println!("server respone: {:#?}", resp);
+                    println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
                 } else {
                     error!("Error parsing provided sensor id: {}", e);
                 }
