@@ -1,0 +1,11 @@
+id,name,address,dataType,registerType,startBit,endBit,sensorType,sensorTypeId,valueMapping
+ffd733e3-2ee2-4e81-a688-2483cb011698,Clogged filter 1,1,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
+ac5033bd-f62a-4038-b7b9-be15d437dca5,Clogged filter 2,2,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
+dca27f4a-afd5-49ea-b69b-bcbb7d796b6e,Clogged filter 3,3,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
+5d4d397d-7dbd-4c48-8118-4aa0b5f628e5,Clogged filter 4,4,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
+076be242-a5ea-4ce9-8383-085a53bd630f,Clogged filter 5,5,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
+e01f3ed7-4c50-47b1-81b0-c8c7b11c22bd,Clogged filter 6,6,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
+7199abea-efd4-4f96-98f7-18b297eb6f46,Clogged filter 7,7,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
+193d460f-4cb0-4eea-b98b-1d880398170c,Clogged filter 8,8,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
+,Clogged filter 9,9,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"
+,Clogged filter 10,10,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,"Inactive:0,Active:1"

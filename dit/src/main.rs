@@ -5,11 +5,15 @@ use std::path::Path;
 
 use crate::hyperview::{
     api::{
-        add_bacnet_definition, add_or_update_non_numeric_sensor, add_or_update_numeric_sensor,
-        get_bacnet_definition_list, get_bacnet_non_numeric_sensors, get_bacnet_numeric_sensors,
-        get_sensor_type_asset_type_map,
+        add_bacnet_definition, import_bacnet_non_numeric_sensors, import_bacnet_numeric_sensors,
+        import_modbus_non_numeric_sensors, import_modbus_numeric_sensors,
+        list_bacnet_non_numeric_sensors, list_bacnet_numeric_sensors, list_definitions,
+        list_modbus_non_numeric_sensors, list_modbus_numeric_sensors, list_sensor_types,
     },
-    api_data::{BacnetIpNonNumericSensorExportWrapper, DefinitionType},
+    api_data::{
+        BacnetIpNonNumericSensorExportWrapper, DefinitionType,
+        ModbusTcpNonNumericSensorExportWrapper,
+    },
     app_errors::AppError,
     cli::{
         get_config_path, get_debug_filter, handle_output_choice, AppArgs, AppConfig, LoaderCommands,
@@ -33,8 +37,8 @@ fn main() -> Result<()> {
     info!("Hyperview Instance: {}", config.instance_url);
 
     match &args.command {
-        LoaderCommands::GetBacnetDefinitions => {
-            let resp = get_bacnet_definition_list(&config, DefinitionType::Bacnet)?;
+        LoaderCommands::ListBacnetDefinitions => {
+            let resp = list_definitions(&config, DefinitionType::Bacnet)?;
 
             for (i, d) in resp.iter().enumerate() {
                 println!("---- [{}] ----", i);
@@ -53,16 +57,16 @@ fn main() -> Result<()> {
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
 
-        LoaderCommands::GetBacnetNumericSensors(options) => {
-            let resp = get_bacnet_numeric_sensors(&config, options.definition_id.clone())?;
+        LoaderCommands::ListBacnetNumericSensors(options) => {
+            let resp = list_bacnet_numeric_sensors(&config, options.definition_id.clone())?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 
             handle_output_choice(output_type.to_owned(), filename.to_owned(), resp)?;
         }
 
-        LoaderCommands::GetBacnetNonNumericSensors(options) => {
-            let resp = get_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
+        LoaderCommands::ListBacnetNonNumericSensors(options) => {
+            let resp = list_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
             let resp_export_do: Vec<BacnetIpNonNumericSensorExportWrapper> = resp
                 .into_iter()
                 .map(BacnetIpNonNumericSensorExportWrapper)
@@ -73,7 +77,7 @@ fn main() -> Result<()> {
             handle_output_choice(output_type.to_owned(), filename.to_owned(), resp_export_do)?;
         }
 
-        LoaderCommands::AddBacnetNumericSensor(options) => {
+        LoaderCommands::ImportBacnetNumericSensors(options) => {
             let filename = &options.filename;
 
             if !Path::new(filename).exists() {
@@ -88,10 +92,10 @@ fn main() -> Result<()> {
                 filename, definition_id
             );
 
-            add_or_update_numeric_sensor(&config, definition_id.to_owned(), filename.to_owned())?;
+            import_bacnet_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
         }
 
-        LoaderCommands::AddBacnetNonNumericSensor(options) => {
+        LoaderCommands::ImportBacnetNonNumericSensors(options) => {
             let filename = &options.filename;
 
             if !Path::new(filename).exists() {
@@ -106,15 +110,15 @@ fn main() -> Result<()> {
                 filename, definition_id
             );
 
-            add_or_update_non_numeric_sensor(
+            import_bacnet_non_numeric_sensors(
                 &config,
                 definition_id.to_owned(),
                 filename.to_owned(),
             )?;
         }
 
-        LoaderCommands::GetModbusDefinitions => {
-            let resp = get_bacnet_definition_list(&config, DefinitionType::Modbus)?;
+        LoaderCommands::ListModbusDefinitions => {
+            let resp = list_definitions(&config, DefinitionType::Modbus)?;
 
             for (i, d) in resp.iter().enumerate() {
                 println!("---- [{}] ----", i);
@@ -133,7 +137,67 @@ fn main() -> Result<()> {
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
 
-        LoaderCommands::GetSensorTypes(options) => {
+        LoaderCommands::ListModbusNumericSensors(options) => {
+            let resp = list_modbus_numeric_sensors(&config, options.definition_id.clone())?;
+            let filename = &options.filename;
+            let output_type = &options.output_type;
+
+            handle_output_choice(output_type.to_owned(), filename.to_owned(), resp)?;
+        }
+
+        LoaderCommands::ListModbusNonNumericSensors(options) => {
+            let resp = list_modbus_non_numeric_sensors(&config, options.definition_id.clone())?;
+            let resp_export_do: Vec<ModbusTcpNonNumericSensorExportWrapper> = resp
+                .into_iter()
+                .map(ModbusTcpNonNumericSensorExportWrapper)
+                .collect();
+            let filename = &options.filename;
+            let output_type = &options.output_type;
+
+            handle_output_choice(output_type.to_owned(), filename.to_owned(), resp_export_do)?;
+        }
+
+        LoaderCommands::ImportModbusNumericSensors(options) => {
+            let filename = &options.filename;
+
+            if !Path::new(filename).exists() {
+                error!("Specified input file does not exists. exiting ...");
+                return Err(AppError::InputFileDoesNotExist.into());
+            }
+
+            let definition_id = &options.definition_id;
+
+            info!(
+                "Uploading numeric sensors using file: {}, for definition: {}",
+                filename, definition_id
+            );
+
+            import_modbus_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
+        }
+
+        LoaderCommands::ImportModbusNonNumericSensors(options) => {
+            let filename = &options.filename;
+
+            if !Path::new(filename).exists() {
+                error!("Specified input file does not exists. exiting ...");
+                return Err(AppError::InputFileDoesNotExist.into());
+            }
+
+            let definition_id = &options.definition_id;
+
+            info!(
+                "Uploading numeric sensors using file: {}, for definition: {}",
+                filename, definition_id
+            );
+
+            import_modbus_non_numeric_sensors(
+                &config,
+                definition_id.to_owned(),
+                filename.to_owned(),
+            )?;
+        }
+
+        LoaderCommands::ListSensorTypes(options) => {
             let query = vec![
                 ("assetTypeId".to_string(), options.asset_type.clone()),
                 (
@@ -142,7 +206,7 @@ fn main() -> Result<()> {
                 ),
             ];
 
-            let resp = get_sensor_type_asset_type_map(&config, query)?;
+            let resp = list_sensor_types(&config, query)?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 

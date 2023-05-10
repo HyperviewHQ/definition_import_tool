@@ -70,31 +70,43 @@ pub struct AppArgs {
 #[derive(Subcommand)]
 pub enum LoaderCommands {
     /// List current BACnet definitions
-    GetBacnetDefinitions,
+    ListBacnetDefinitions,
 
     /// Add a new BACnet definition
     AddBacnetDefinition(AddDefinitionArgs),
 
-    /// Get a list of existing numeric sensors for a specific definition
-    GetBacnetNumericSensors(GetSensorsArgs),
+    /// List numeric sensors for a definition
+    ListBacnetNumericSensors(ListSensorsArgs),
 
-    /// Get a list of existing non-numeric sensors for a specific definition
-    GetBacnetNonNumericSensors(GetSensorsArgs),
+    /// List non-numeric sensors for a definition
+    ListBacnetNonNumericSensors(ListSensorsArgs),
 
-    /// Adds numeric sensors to a definition
-    AddBacnetNumericSensor(AddSensorArgs),
+    /// Import numeric sensors to a definition
+    ImportBacnetNumericSensors(ImportSensorArgs),
 
-    /// Adds non-numeric sensors to a definition
-    AddBacnetNonNumericSensor(AddSensorArgs),
+    /// Import non-numeric sensors to a definition
+    ImportBacnetNonNumericSensors(ImportSensorArgs),
 
     /// List current Modbus definitions
-    GetModbusDefinitions,
+    ListModbusDefinitions,
 
     /// Add a new Modbus definition
     AddModbusDefinition(AddDefinitionArgs),
 
-    /// Get sensor types compatible with an asset type
-    GetSensorTypes(GetSensorTypesArgs),
+    /// List numeric sensors for a definition
+    ListModbusNumericSensors(ListSensorsArgs),
+
+    /// List non-numeric sensors for a definition
+    ListModbusNonNumericSensors(ListSensorsArgs),
+
+    /// Import numeric sensors to a definition
+    ImportModbusNumericSensors(ImportSensorArgs),
+
+    /// Import non-numeric sensors to a definition
+    ImportModbusNonNumericSensors(ImportSensorArgs),
+
+    /// List sensor types compatible with an asset type
+    ListSensorTypes(ListSensorTypesArgs),
 }
 
 #[derive(Args)]
@@ -112,7 +124,7 @@ pub struct AddDefinitionArgs {
 }
 
 #[derive(Args)]
-pub struct GetSensorsArgs {
+pub struct ListSensorsArgs {
     #[arg(short, long, help = "Definition id")]
     pub definition_id: String,
 
@@ -124,7 +136,7 @@ pub struct GetSensorsArgs {
 }
 
 #[derive(Args)]
-pub struct AddSensorArgs {
+pub struct ImportSensorArgs {
     #[arg(short, long, help = "CSV file name")]
     pub filename: String,
 
@@ -133,7 +145,7 @@ pub struct AddSensorArgs {
 }
 
 #[derive(Args)]
-pub struct GetSensorTypesArgs {
+pub struct ListSensorTypesArgs {
     #[arg(
         short = 't',
         long,
