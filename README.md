@@ -1,5 +1,5 @@
 # Definition Import Tool (DIT)
-DIT is a tool that allows Hyperview users to import and maintain BACnet and Modbus **(Roadmap)** definitions from the command line. Hyperview has a GUI for users to manage BACnet and Modbus definitions, however, in larger sites with hundreds or thousands of sensors, a command line tool makes it easier to manage the definitions in bulk. 
+DIT is a tool that allows Hyperview users to import and maintain BACnet and Modbus definitions from the command line. Hyperview has a GUI for users to manage BACnet and Modbus definitions, however, in larger sites with hundreds or thousands of sensors, a command line tool makes it easier to manage the definitions in bulk. 
 
 # Configuration
 A valid Hyperview API client must be used. The API client must have the appropriate access. The configuration file must be placed in `$HOME/.hyperview/hyperview.toml`
@@ -19,20 +19,26 @@ instance_url = 'https://example.hyperviewhq.com'
 DIT has various commands for the various actions it can perform. 
 
 ```console
-$ ./dit help                                                                                                                  main 
+$ ./dit help
 An import tool for BACnet and Modbus sensor definitions for Hyperview
 
 Usage: dit [OPTIONS] <COMMAND>
 
 Commands:
-  get-bacnet-definitions          List current BACnet definitions
-  add-bacnet-definition           Add a new BACnet definition
-  get-bacnet-numeric-sensors      Get a list of existing numeric sensors for a specific definition
-  get-bacnet-non-numeric-sensors  Get a list of existing non-numeric sensors for a specific definition
-  add-bacnet-numeric-sensor       Adds numeric sensors to a definition
-  add-bacnet-non-numeric-sensor   Adds non-numeric sensors to a definition
-  get-sensor-types                Get sensor types compatible with an asset type
-  help                            Print this message or the help of the given subcommand(s)
+  list-bacnet-definitions            List current BACnet definitions
+  add-bacnet-definition              Add a new BACnet definition
+  list-bacnet-numeric-sensors        List numeric sensors for a definition
+  list-bacnet-non-numeric-sensors    List non-numeric sensors for a definition
+  import-bacnet-numeric-sensors      Import numeric sensors to a definition
+  import-bacnet-non-numeric-sensors  Import non-numeric sensors to a definition
+  list-modbus-definitions            List current Modbus definitions
+  add-modbus-definition              Add a new Modbus definition
+  list-modbus-numeric-sensors        List numeric sensors for a definition
+  list-modbus-non-numeric-sensors    List non-numeric sensors for a definition
+  import-modbus-numeric-sensors      Import numeric sensors to a definition
+  import-modbus-non-numeric-sensors  Import non-numeric sensors to a definition
+  list-sensor-types                  List sensor types compatible with an asset type
+  help                               Print this message or the help of the given subcommand(s)
 
 Options:
   -l, --debug-level <DEBUG_LEVEL>  Debug level [default: error] [possible values: trace, debug, info, warn, error]
