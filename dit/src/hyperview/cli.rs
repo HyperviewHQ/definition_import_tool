@@ -96,6 +96,9 @@ pub enum LoaderCommands {
     /// List numeric sensors for a definition
     ListModbusNumericSensors(ListSensorsArgs),
 
+    /// List non-numeric sensors for a definition
+    ListModbusNonNumericSensors(ListSensorsArgs),
+
     /// List sensor types compatible with an asset type
     ListSensorTypes(ListSensorTypesArgs),
 }

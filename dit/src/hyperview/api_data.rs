@@ -146,6 +146,8 @@ impl fmt::Display for BacnetIpNonNumericSensor {
     }
 }
 
+// The export wrapper is implemented because we have two potential serialization paths. 
+// One for CSV export and another from the standard serde Serialize/De-Serialize funtionality
 pub struct BacnetIpNonNumericSensorExportWrapper(pub BacnetIpNonNumericSensor);
 
 impl fmt::Display for BacnetIpNonNumericSensorExportWrapper {
@@ -333,6 +335,47 @@ impl fmt::Display for ModbusTcpNonNumericSensor {
             .fold(String::new(), |acc, m| acc + "\n" + &m.to_string());
 
         write!(f, "{}\n{}", sensor_header, sensor_value_mapping)
+    }
+}
+
+// The export wrapper is implemented because we have two potential serialization paths. 
+// One for CSV export and another from the standard serde Serialize/De-Serialize funtionality
+pub struct ModbusTcpNonNumericSensorExportWrapper(pub ModbusTcpNonNumericSensor);
+
+impl fmt::Display for ModbusTcpNonNumericSensorExportWrapper{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Serialize for ModbusTcpNonNumericSensorExportWrapper {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut state = serializer.serialize_struct("ModbusTcpNonNumericSensorExportWrapper", 10)?;
+
+        state.serialize_field("id", &self.0.id)?;
+        state.serialize_field("name", &self.0.name)?;
+        state.serialize_field("address", &self.0.address)?;
+        state.serialize_field("dataType", &self.0.data_type)?;
+        state.serialize_field("registerType", &self.0.register_type)?;
+        state.serialize_field("startBit", &self.0.start_bit)?;
+        state.serialize_field("endBit", &self.0.end_bit)?;
+        state.serialize_field("sensorType", &self.0.sensor_type)?;
+        state.serialize_field("sensorTypeId", &self.0.sensor_type_id)?;
+
+        let value_mapping_str = self
+            .0
+            .value_mapping
+            .iter()
+            .map(|vm| format!("{}:{}", vm.text, vm.value))
+            .collect::<Vec<String>>()
+            .join(",");
+
+        state.serialize_field("valueMapping", &value_mapping_str)?;
+
+        state.end()
     }
 }
 

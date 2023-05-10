@@ -137,6 +137,18 @@ fn main() -> Result<()> {
             handle_output_choice(output_type.to_owned(), filename.to_owned(), resp)?;
         }
 
+        LoaderCommands::ListModbusNonNumericSensors(options) => {
+            let resp = list_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
+            let resp_export_do: Vec<BacnetIpNonNumericSensorExportWrapper> = resp
+                .into_iter()
+                .map(BacnetIpNonNumericSensorExportWrapper)
+                .collect();
+            let filename = &options.filename;
+            let output_type = &options.output_type;
+
+            handle_output_choice(output_type.to_owned(), filename.to_owned(), resp_export_do)?;
+        }
+
         LoaderCommands::ListSensorTypes(options) => {
             let query = vec![
                 ("assetTypeId".to_string(), options.asset_type.clone()),
