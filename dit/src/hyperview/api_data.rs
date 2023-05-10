@@ -294,6 +294,48 @@ impl fmt::Display for ModbusTcpNumericSensor {
     }
 }
 
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModbusTcpNonNumericSensor {
+    pub id: Option<String>,
+    pub name: String,
+    address: usize,
+    #[serde(alias = "dataType")]
+    data_type: String,
+    #[serde(alias = "registerType")]
+    register_type: String,
+    #[serde(alias = "startBit")]
+    start_bit: usize,
+    #[serde(alias = "endBit")]
+    end_bit: usize,
+    #[serde(alias = "sensorType")]
+    sensor_type: String,
+    #[serde(alias = "sensorTypeId")]
+    sensor_type_id: String,
+    #[serde(alias = "valueMapping")]
+    value_mapping: Vec<ValueMapping>,
+}
+
+impl fmt::Display for ModbusTcpNonNumericSensor {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let id = match self.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
+        let sensor_header = format!(
+            "id: {}\nname: {}\naddress: {}\ndata type: {}\nregister type: {}\nstart bit: {}\nend bit: {}\nsensor type: {}\nsensor type id: {}",
+            id, self.name, self.address, self.data_type, self.register_type, self.start_bit, self.end_bit, self.sensor_type, self.sensor_type_id
+        );
+        let sensor_value_mapping = &self
+            .value_mapping
+            .iter()
+            .fold(String::new(), |acc, m| acc + "\n" + &m.to_string());
+
+        write!(f, "{}\n{}", sensor_header, sensor_value_mapping)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
