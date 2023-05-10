@@ -298,6 +298,28 @@ impl fmt::Display for ModbusTcpNumericSensor {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct ModbusTcpNonNumericSensorCsv {
+    pub id: Option<String>,
+    pub name: String,
+    address: usize,
+    #[serde(alias = "dataType")]
+    data_type: String,
+    #[serde(alias = "registerType")]
+    register_type: String,
+    #[serde(alias = "startBit")]
+    start_bit: usize,
+    #[serde(alias = "endBit")]
+    end_bit: usize,
+    #[serde(alias = "sensorType")]
+    sensor_type: String,
+    #[serde(alias = "sensorTypeId")]
+    sensor_type_id: String,
+    #[serde(alias = "valueMapping")]
+    value_mapping: String,
+}
+
+#[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ModbusTcpNonNumericSensor {
     pub id: Option<String>,
     pub name: String,
@@ -380,12 +402,44 @@ impl Serialize for ModbusTcpNonNumericSensorExportWrapper {
     }
 }
 
+impl From<ModbusTcpNonNumericSensorCsv> for ModbusTcpNonNumericSensor {
+    fn from(source: ModbusTcpNonNumericSensorCsv) -> Self {
+        let mappings = source
+            .value_mapping
+            .split(',')
+            .filter_map(|pair| {
+                let mut parts = pair.splitn(2, ':');
+                Some(ValueMapping {
+                    text: parts.next()?.to_string(),
+                    value: parts
+                        .next()?
+                        .parse::<usize>()
+                        .expect("could not parse value to integer"),
+                })
+            })
+            .collect();
+
+        ModbusTcpNonNumericSensor {
+            id: source.id,
+            name: source.name,
+            address: source.address,
+            data_type: source.data_type,
+            register_type: source.register_type,
+            start_bit: source.start_bit,
+            end_bit: source.end_bit,
+            sensor_type: source.sensor_type,
+            sensor_type_id: source.sensor_type_id,
+            value_mapping: mappings,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_sensor_csv_serialization() {
+    fn test_bacnet_sensor_csv_serialization() {
         let sensor = BacnetIpNonNumericSensorExportWrapper(BacnetIpNonNumericSensor {
             id: Some("247a4ad9-9d18-4bf4-b20b-a1d7d61b3971".to_string()),
             name: "Sensor 1".to_string(),
@@ -405,6 +459,7 @@ mod tests {
             ],
         });
 
+
         let mut wtr = csv::Writer::from_writer(vec![]);
         wtr.serialize(&sensor).expect("Failed to serialize sensor");
 
@@ -412,6 +467,41 @@ mod tests {
             .expect("Failed to convert to string");
 
         let expected_data = "id,name,objectInstance,objectType,sensorType,sensorTypeId,valueMapping\n247a4ad9-9d18-4bf4-b20b-a1d7d61b3971,Sensor 1,0,Temperature,Analog,1000,\"Low:0,High:1\"\n";
+
+        assert_eq!(data, expected_data);
+    }
+
+    #[test]
+    fn test_modbus_sensor_csv_serialization() {
+        let sensor = ModbusTcpNonNumericSensorExportWrapper(ModbusTcpNonNumericSensor {
+            id: Some("ffd733e3-2ee2-4e81-a688-2483cb011698".to_string()),
+            name: "Clogged filter 1".to_string(),
+            address: 1,
+            data_type: "uInteger16".to_string(),
+            register_type: "holdingRegister".to_string(),
+            start_bit: 1,
+            end_bit: 16,
+            sensor_type: "cloggedFilter".to_string(),
+            sensor_type_id: "f4531ff2-ebf8-49d2-bd4f-4d64c39e4283".to_string(),
+            value_mapping: vec![
+                ValueMapping {
+                    text: "Inactive".to_string(),
+                    value: 0,
+                },
+                ValueMapping {
+                    text: "Active".to_string(),
+                    value: 1,
+                },
+            ],
+        });
+
+        let mut wtr = csv::Writer::from_writer(vec![]);
+        wtr.serialize(&sensor).expect("Failed to serialize sensor");
+
+        let data = String::from_utf8(wtr.into_inner().expect("Failed to get inner writer"))
+            .expect("Failed to convert to string");
+
+        let expected_data = "id,name,address,dataType,registerType,startBit,endBit,sensorType,sensorTypeId,valueMapping\nffd733e3-2ee2-4e81-a688-2483cb011698,Clogged filter 1,1,uInteger16,holdingRegister,1,16,cloggedFilter,f4531ff2-ebf8-49d2-bd4f-4d64c39e4283,\"Inactive:0,Active:1\"\n";
 
         assert_eq!(data, expected_data);
     }

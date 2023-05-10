@@ -102,6 +102,9 @@ pub enum LoaderCommands {
     /// Import numeric sensors to a definition
     ImportModbusNumericSensors(ImportSensorArgs),
 
+    /// Import non-numeric sensors to a definition
+    ImportModbusNonNumericSensors(ImportSensorArgs),
+
     /// List sensor types compatible with an asset type
     ListSensorTypes(ListSensorTypesArgs),
 }

@@ -424,7 +424,6 @@ pub fn import_bacnet_non_numeric_sensors(
                     .send()?
                     .json::<Value>()?;
 
-                //println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
                 println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
             }
 
@@ -434,6 +433,82 @@ pub fn import_bacnet_non_numeric_sensors(
                     let target_url = format!(
                         "{}{}/bacnetIpNonNumericSensors/{}",
                         config.instance_url, BACNET_API_PREFIX, definition_id
+                    );
+
+                    let resp = req
+                        .post(target_url)
+                        .header(AUTHORIZATION, auth_header.clone())
+                        .header(CONTENT_TYPE, "application/json")
+                        .header(ACCEPT, "application/json")
+                        .json(&sensor)
+                        .send()?
+                        .json::<Value>()?;
+
+                    println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
+                } else {
+                    error!("Error parsing provided sensor id: {}", e);
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
+pub fn import_modbus_non_numeric_sensors(
+    config: &AppConfig,
+    definition_id: String,
+    filename: String,
+) -> Result<()> {
+    // Get Authorization header for request
+    let auth_header = get_auth_header(config)?;
+
+    // Start http client
+    let req = reqwest::blocking::Client::new();
+
+    let mut reader = csv::Reader::from_path(filename)?;
+
+    while let Some(Ok(sensor_csv)) = reader.deserialize::<ModbusTcpNonNumericSensorCsv>().next() {
+        info!("Processing input line: {:?}", sensor_csv);
+        let mut sensor: ModbusTcpNonNumericSensor = sensor_csv.into();
+
+        let id = match sensor.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        };
+
+        if String::is_empty(&id) {
+            sensor.id = None;
+        }
+
+        match Uuid::try_parse(&id) {
+            Ok(u) => {
+                // existing sensor with valid uuid
+                println!("Updating sensor with id: {} and name: {}", u, &sensor.name);
+
+                let target_url = format!(
+                    "{}{}/modbusTcpNonNumericSensors/{}/{}",
+                    config.instance_url, MODBUS_API_PREFIX, definition_id, u
+                );
+
+                let resp = req
+                    .put(target_url)
+                    .header(AUTHORIZATION, auth_header.clone())
+                    .header(CONTENT_TYPE, "application/json")
+                    .header(ACCEPT, "application/json")
+                    .json(&sensor)
+                    .send()?
+                    .json::<Value>()?;
+
+                println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
+            }
+
+            Err(e) => {
+                if !sensor.name.is_empty() && id.is_empty() {
+                    println!("Adding new sensor with name: {}", &sensor.name);
+                    let target_url = format!(
+                        "{}{}/modbusTcpNonNumericSensors/{}",
+                        config.instance_url, MODBUS_API_PREFIX, definition_id
                     );
 
                     let resp = req
