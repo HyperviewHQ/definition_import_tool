@@ -1,6 +1,6 @@
 [package]
 name = "dit"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 authors = ["Hyperview Technologies Inc."]
 description = "An import tool for BACnet and Modbus sensor definitions for Hyperview"
