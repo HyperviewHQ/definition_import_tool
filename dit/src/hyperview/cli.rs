@@ -213,3 +213,80 @@ pub fn handle_output_choice<T: Display + Serialize>(
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs::File;
+    use std::io::BufReader;
+    use std::io::Read;
+    use tempfile::NamedTempFile;
+
+    #[test]
+    fn test_write_output() {
+        // Create test data
+        let data = vec![1, 2, 3, 4, 5];
+
+        // Create a temporary file
+        let temp_file = NamedTempFile::new().unwrap();
+        let temp_file_path = temp_file.path().to_str().unwrap().to_string();
+
+        // Call the function with the test data and the temporary file path
+        let result = write_output(temp_file_path.clone(), data);
+        assert!(result.is_ok());
+
+        // Read back the file
+        let file = File::open(temp_file_path).unwrap();
+        let mut reader = BufReader::new(file);
+        let mut contents = String::new();
+        reader.read_to_string(&mut contents).unwrap();
+
+        println!("{}", contents);
+
+        assert_eq!("1\n2\n3\n4\n5\n", contents);
+    }
+
+    #[test]
+    fn test_handle_output_choice_no_filename() {
+        let output_type = "csv".to_string();
+        let filename = None;
+        let resp: Vec<i32> = vec![1, 2, 3, 4, 5];
+
+        match handle_output_choice(output_type, filename, resp) {
+            Err(e) => assert_eq!(e.to_string(), AppError::NoOutputFilename.to_string()),
+            _ => panic!("Expected Err, but got Ok"),
+        }
+    }
+
+    #[test]
+    fn test_handle_output_choice_file_exists() {
+        let output_type = "csv".to_string();
+        let temp_file = NamedTempFile::new().unwrap();
+        let filename = Some(temp_file.path().to_str().unwrap().to_string());
+        let resp: Vec<i32> = vec![1, 2, 3, 4, 5];
+
+        match handle_output_choice(output_type, filename, resp) {
+            Err(e) => assert_eq!(e.to_string(), AppError::FileExists.to_string()),
+            _ => panic!("Expected Err, but got Ok"),
+        }
+    }
+
+    #[test]
+    fn test_handle_output_choice_write_output() {
+        let output_type = "csv".to_string();
+        let temp_file = NamedTempFile::new().unwrap();
+        let temp_file_path = temp_file.path().to_str().unwrap().to_string();
+        let filename = Some(temp_file_path.clone() + "_new");
+        let resp: Vec<i32> = vec![1, 2, 3, 4, 5];
+
+        let result = handle_output_choice(output_type, filename.clone(), resp);
+        assert!(result.is_ok());
+
+        let mut file =  File::open(filename.unwrap()).unwrap();
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).unwrap();
+
+        // Check the contents of the file
+        assert_eq!(contents, "1\n2\n3\n4\n5\n");
+    }
+}

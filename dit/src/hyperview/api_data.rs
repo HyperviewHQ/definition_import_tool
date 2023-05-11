@@ -459,7 +459,6 @@ mod tests {
             ],
         });
 
-
         let mut wtr = csv::Writer::from_writer(vec![]);
         wtr.serialize(&sensor).expect("Failed to serialize sensor");
 
