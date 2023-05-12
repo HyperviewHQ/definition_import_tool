@@ -4,7 +4,7 @@ use csv::Writer;
 use log::{error, LevelFilter};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
-use std::path::Path;
+use std::path::{Path, MAIN_SEPARATOR_STR};
 
 use crate::hyperview::app_errors::AppError;
 
@@ -53,7 +53,12 @@ pub struct AppConfig {
 pub fn get_config_path() -> String {
     let home_path = dirs::home_dir().expect("Error: Home directory not found");
 
-    format!("{}/.hyperview/hyperview.toml", home_path.to_str().unwrap())
+    format!(
+        "{}{}.hyperview{}hyperview.toml",
+        home_path.to_str().unwrap(),
+        MAIN_SEPARATOR_STR,
+        MAIN_SEPARATOR_STR
+    )
 }
 
 #[derive(Parser)]
@@ -220,7 +225,22 @@ mod tests {
     use std::fs::File;
     use std::io::BufReader;
     use std::io::Read;
+    use std::path::MAIN_SEPARATOR_STR;
     use tempfile::NamedTempFile;
+
+    #[test]
+    fn test_get_config_path() {
+        let config_path = get_config_path();
+        let home_path = dirs::home_dir().unwrap();
+        let expected_path = format!(
+            "{}{}.hyperview{}hyperview.toml",
+            home_path.to_str().unwrap(),
+            MAIN_SEPARATOR_STR,
+            MAIN_SEPARATOR_STR
+        );
+
+        assert_eq!(config_path, expected_path);
+    }
 
     #[test]
     fn test_write_output() {
