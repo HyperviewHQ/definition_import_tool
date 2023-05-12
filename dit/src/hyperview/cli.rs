@@ -241,8 +241,6 @@ mod tests {
         let mut contents = String::new();
         reader.read_to_string(&mut contents).unwrap();
 
-        println!("{}", contents);
-
         assert_eq!("1\n2\n3\n4\n5\n", contents);
     }
 
@@ -282,7 +280,7 @@ mod tests {
         let result = handle_output_choice(output_type, filename.clone(), resp);
         assert!(result.is_ok());
 
-        let mut file =  File::open(filename.unwrap()).unwrap();
+        let mut file = File::open(filename.unwrap()).unwrap();
         let mut contents = String::new();
         file.read_to_string(&mut contents).unwrap();
 
