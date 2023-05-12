@@ -46,6 +46,26 @@ Options:
   -V, --version                    Print version
 ```
 
+# Datatypes
+Sensor types and units can be extracted using the tool and exported to CSV to make it easy for you to build your imports.
+
+## Modbus Data Types
+- uInteger16
+- integer16
+- uInteger32BigEndian
+- uInteger32LittleEndian
+- integer32BigEndian
+- integer32LittleEndian
+- float32BigEndian
+- float32LittleEndian
+- boolean
+
+## Modbus Register Types
+- inputRegister
+- holdingRegister
+- coil
+- discreteInput
+
 # Building
 
 ## Linux
