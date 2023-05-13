@@ -229,6 +229,16 @@ mod tests {
     use tempfile::NamedTempFile;
 
     #[test]
+    fn test_get_debug_filter() {
+        assert_eq!(get_debug_filter(&"error".to_string()), LevelFilter::Error);
+        assert_eq!(get_debug_filter(&"warn".to_string()), LevelFilter::Warn);
+        assert_eq!(get_debug_filter(&"debug".to_string()), LevelFilter::Debug);
+        assert_eq!(get_debug_filter(&"trace".to_string()), LevelFilter::Trace);
+        assert_eq!(get_debug_filter(&"info".to_string()), LevelFilter::Info);
+        assert_eq!(get_debug_filter(&"unknown".to_string()), LevelFilter::Info);
+    }
+
+    #[test]
     fn test_get_config_path() {
         let config_path = get_config_path();
         let home_path = dirs::home_dir().unwrap();
