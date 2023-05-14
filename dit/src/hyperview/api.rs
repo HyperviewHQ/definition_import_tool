@@ -1,10 +1,13 @@
 use anyhow::Result;
 use log::{error, info};
-use reqwest::header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE};
+use reqwest::{
+    blocking::Client,
+    header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
+};
 use serde_json::Value;
 use uuid::Uuid;
 
-use super::{api_data::*, auth::get_auth_header, cli::AppConfig};
+use super::{api_data::*, cli::AppConfig};
 
 const BACNET_API_PREFIX: &str = "/api/setting/bacnetIpDefinitions";
 const MODBUS_API_PREFIX: &str = "/api/setting/modbusTcpDefinitions";
@@ -13,10 +16,9 @@ const SENSOR_TYPE_ASSET_TYPE: &str = "/api/setting/sensorTypeAssetType";
 pub fn list_definitions(
     config: &AppConfig,
     definition_type: DefinitionType,
+    auth_header: String,
+    req: Client,
 ) -> Result<Vec<Definition>> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
     // format target
     let target_url = match definition_type {
         DefinitionType::Bacnet => {
@@ -26,9 +28,6 @@ pub fn list_definitions(
             format!("{}{}", config.instance_url, MODBUS_API_PREFIX)
         }
     };
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
 
     // Get response
     let resp = req
@@ -45,18 +44,14 @@ pub fn list_definitions(
 pub fn list_bacnet_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
+    auth_header: String,
+    req: Client,
 ) -> Result<Vec<BacnetIpNumericSensor>> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
     // format target
     let target_url = format!(
         "{}{}/bacnetIpNumericSensors/{}",
         config.instance_url, BACNET_API_PREFIX, definition_id
     );
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
 
     // Get response
     let resp = req
@@ -73,18 +68,14 @@ pub fn list_bacnet_numeric_sensors(
 pub fn list_modbus_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
+    auth_header: String,
+    req: Client,
 ) -> Result<Vec<ModbusTcpNumericSensor>> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
     // format target
     let target_url = format!(
         "{}{}/modbusTcpNumericSensors/{}",
         config.instance_url, MODBUS_API_PREFIX, definition_id
     );
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
 
     // Get response
     let resp = req
@@ -101,18 +92,14 @@ pub fn list_modbus_numeric_sensors(
 pub fn list_bacnet_non_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
+    auth_header: String,
+    req: Client,
 ) -> Result<Vec<BacnetIpNonNumericSensor>> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
     // format target
     let target_url = format!(
         "{}{}/bacnetIpNonNumericSensors/{}",
         config.instance_url, BACNET_API_PREFIX, definition_id
     );
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
 
     // Get response
     let resp = req
@@ -129,18 +116,14 @@ pub fn list_bacnet_non_numeric_sensors(
 pub fn list_modbus_non_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
+    auth_header: String,
+    req: Client,
 ) -> Result<Vec<ModbusTcpNonNumericSensor>> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
     // format target
     let target_url = format!(
         "{}{}/modbusTcpNonNumericSensors/{}",
         config.instance_url, MODBUS_API_PREFIX, definition_id
     );
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
 
     // Get response
     let resp = req
@@ -159,10 +142,9 @@ pub fn add_bacnet_definition(
     name: String,
     asset_type: String,
     definition_type: DefinitionType,
+    auth_header: String,
+    req: Client,
 ) -> Result<Value> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
     // format target
     let target_url = match definition_type {
         DefinitionType::Bacnet => {
@@ -172,9 +154,6 @@ pub fn add_bacnet_definition(
             format!("{}{}", config.instance_url, MODBUS_API_PREFIX)
         }
     };
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
 
     // Construct definition
     let def = Definition {
@@ -198,15 +177,11 @@ pub fn add_bacnet_definition(
 pub fn list_sensor_types(
     config: &AppConfig,
     query: Vec<(String, String)>,
+    auth_header: String,
+    req: Client,
 ) -> Result<Vec<SensorType>> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
     // format target
     let target_url = format!("{}{}", config.instance_url, SENSOR_TYPE_ASSET_TYPE);
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
 
     // Get response
     let resp = req
@@ -225,13 +200,9 @@ pub fn import_bacnet_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
+    auth_header: String,
+    req: Client,
 ) -> Result<()> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
-
     let mut reader = csv::Reader::from_path(filename)?;
 
     while let Some(Ok(mut sensor)) = reader.deserialize::<BacnetIpNumericSensor>().next() {
@@ -304,13 +275,9 @@ pub fn import_modbus_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
+    auth_header: String,
+    req: Client,
 ) -> Result<()> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
-
     let mut reader = csv::Reader::from_path(filename)?;
 
     while let Some(Ok(mut sensor)) = reader.deserialize::<ModbusTcpNumericSensor>().next() {
@@ -383,13 +350,9 @@ pub fn import_bacnet_non_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
+    auth_header: String,
+    req: Client,
 ) -> Result<()> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
-
     let mut reader = csv::Reader::from_path(filename)?;
 
     while let Some(Ok(sensor_csv)) = reader.deserialize::<BacnetIpNonNumericSersorCsv>().next() {
@@ -459,13 +422,9 @@ pub fn import_modbus_non_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
+    auth_header: String,
+    req: Client,
 ) -> Result<()> {
-    // Get Authorization header for request
-    let auth_header = get_auth_header(config)?;
-
-    // Start http client
-    let req = reqwest::blocking::Client::new();
-
     let mut reader = csv::Reader::from_path(filename)?;
 
     while let Some(Ok(sensor_csv)) = reader.deserialize::<ModbusTcpNonNumericSensorCsv>().next() {

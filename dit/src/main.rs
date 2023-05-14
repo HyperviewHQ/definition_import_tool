@@ -15,6 +15,7 @@ use crate::hyperview::{
         ModbusTcpNonNumericSensorExportWrapper,
     },
     app_errors::AppError,
+    auth::get_auth_header,
     cli::{
         get_config_path, get_debug_filter, handle_output_choice, AppArgs, AppConfig, LoaderCommands,
     },
@@ -36,9 +37,15 @@ fn main() -> Result<()> {
     let config: AppConfig = confy::load_path(get_config_path())?;
     info!("Hyperview Instance: {}", config.instance_url);
 
+    // Get Authorization header for request
+    let auth_header = get_auth_header(&config)?;
+
+    // Start http client
+    let req = reqwest::blocking::Client::new();
+
     match &args.command {
         LoaderCommands::ListBacnetDefinitions => {
-            let resp = list_definitions(&config, DefinitionType::Bacnet)?;
+            let resp = list_definitions(&config, DefinitionType::Bacnet, auth_header, req)?;
 
             for (i, d) in resp.iter().enumerate() {
                 println!("---- [{}] ----", i);
@@ -52,13 +59,20 @@ fn main() -> Result<()> {
                 options.name.clone(),
                 options.asset_type.clone(),
                 DefinitionType::Bacnet,
+                auth_header,
+                req,
             )?;
 
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
 
         LoaderCommands::ListBacnetNumericSensors(options) => {
-            let resp = list_bacnet_numeric_sensors(&config, options.definition_id.clone())?;
+            let resp = list_bacnet_numeric_sensors(
+                &config,
+                options.definition_id.clone(),
+                auth_header,
+                req,
+            )?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 
@@ -66,7 +80,12 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::ListBacnetNonNumericSensors(options) => {
-            let resp = list_bacnet_non_numeric_sensors(&config, options.definition_id.clone())?;
+            let resp = list_bacnet_non_numeric_sensors(
+                &config,
+                options.definition_id.clone(),
+                auth_header,
+                req,
+            )?;
             let resp_export_do: Vec<BacnetIpNonNumericSensorExportWrapper> = resp
                 .into_iter()
                 .map(BacnetIpNonNumericSensorExportWrapper)
@@ -92,7 +111,13 @@ fn main() -> Result<()> {
                 filename, definition_id
             );
 
-            import_bacnet_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
+            import_bacnet_numeric_sensors(
+                &config,
+                definition_id.to_owned(),
+                filename.to_owned(),
+                auth_header,
+                req,
+            )?;
         }
 
         LoaderCommands::ImportBacnetNonNumericSensors(options) => {
@@ -114,11 +139,13 @@ fn main() -> Result<()> {
                 &config,
                 definition_id.to_owned(),
                 filename.to_owned(),
+                auth_header,
+                req,
             )?;
         }
 
         LoaderCommands::ListModbusDefinitions => {
-            let resp = list_definitions(&config, DefinitionType::Modbus)?;
+            let resp = list_definitions(&config, DefinitionType::Modbus, auth_header, req)?;
 
             for (i, d) in resp.iter().enumerate() {
                 println!("---- [{}] ----", i);
@@ -132,13 +159,20 @@ fn main() -> Result<()> {
                 options.name.clone(),
                 options.asset_type.clone(),
                 DefinitionType::Modbus,
+                auth_header,
+                req,
             )?;
 
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
 
         LoaderCommands::ListModbusNumericSensors(options) => {
-            let resp = list_modbus_numeric_sensors(&config, options.definition_id.clone())?;
+            let resp = list_modbus_numeric_sensors(
+                &config,
+                options.definition_id.clone(),
+                auth_header,
+                req,
+            )?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 
@@ -146,7 +180,12 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::ListModbusNonNumericSensors(options) => {
-            let resp = list_modbus_non_numeric_sensors(&config, options.definition_id.clone())?;
+            let resp = list_modbus_non_numeric_sensors(
+                &config,
+                options.definition_id.clone(),
+                auth_header,
+                req,
+            )?;
             let resp_export_do: Vec<ModbusTcpNonNumericSensorExportWrapper> = resp
                 .into_iter()
                 .map(ModbusTcpNonNumericSensorExportWrapper)
@@ -172,7 +211,13 @@ fn main() -> Result<()> {
                 filename, definition_id
             );
 
-            import_modbus_numeric_sensors(&config, definition_id.to_owned(), filename.to_owned())?;
+            import_modbus_numeric_sensors(
+                &config,
+                definition_id.to_owned(),
+                filename.to_owned(),
+                auth_header,
+                req,
+            )?;
         }
 
         LoaderCommands::ImportModbusNonNumericSensors(options) => {
@@ -194,6 +239,8 @@ fn main() -> Result<()> {
                 &config,
                 definition_id.to_owned(),
                 filename.to_owned(),
+                auth_header,
+                req,
             )?;
         }
 
@@ -206,7 +253,7 @@ fn main() -> Result<()> {
                 ),
             ];
 
-            let resp = list_sensor_types(&config, query)?;
+            let resp = list_sensor_types(&config, query, auth_header, req)?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 
