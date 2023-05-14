@@ -2,6 +2,16 @@ use serde::{ser::SerializeStruct, Deserialize, Serialize};
 use serde_with::{serde_as, DefaultOnError};
 use std::fmt;
 
+// marker trait
+pub trait NumericSensor {
+    fn clean_sensor_empty_unit(&mut self);
+}
+
+pub trait GenericSensor {
+    fn get_id_as_string(&self) -> String;
+    fn clean_empty_id(&mut self);
+}
+
 #[derive(Debug)]
 pub enum DefinitionType {
     Bacnet,
@@ -81,6 +91,34 @@ impl fmt::Display for BacnetIpNumericSensor {
     }
 }
 
+impl GenericSensor for BacnetIpNumericSensor {
+    fn get_id_as_string(&self) -> String {
+        match self.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        }
+    }
+
+    fn clean_empty_id(&mut self) {
+        let id = self.get_id_as_string();
+        if String::is_empty(&id) {
+            self.id = None;
+        }
+    }
+}
+
+impl NumericSensor for BacnetIpNumericSensor {
+    fn clean_sensor_empty_unit(&mut self) {
+        if self.unit_id == Some("".to_string()) {
+            self.unit_id = None;
+        }
+
+        if self.unit == Some("".to_string()) {
+            self.unit = None;
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct ValueMapping {
     text: String,
@@ -143,6 +181,22 @@ impl fmt::Display for BacnetIpNonNumericSensor {
             .fold(String::new(), |acc, m| acc + "\n" + &m.to_string());
 
         write!(f, "{}\n{}", sensor_header, sensor_value_mapping)
+    }
+}
+
+impl GenericSensor for BacnetIpNonNumericSensor {
+    fn get_id_as_string(&self) -> String {
+        match self.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        }
+    }
+
+    fn clean_empty_id(&mut self) {
+        let id = self.get_id_as_string();
+        if String::is_empty(&id) {
+            self.id = None;
+        }
     }
 }
 
@@ -296,6 +350,34 @@ impl fmt::Display for ModbusTcpNumericSensor {
     }
 }
 
+impl GenericSensor for ModbusTcpNumericSensor {
+    fn get_id_as_string(&self) -> String {
+        match self.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        }
+    }
+
+    fn clean_empty_id(&mut self) {
+        let id = self.get_id_as_string();
+        if String::is_empty(&id) {
+            self.id = None;
+        }
+    }
+}
+
+impl NumericSensor for ModbusTcpNumericSensor {
+    fn clean_sensor_empty_unit(&mut self) {
+        if self.unit_id == Some("".to_string()) {
+            self.unit_id = None;
+        }
+
+        if self.unit == Some("".to_string()) {
+            self.unit = None;
+        }
+    }
+}
+
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ModbusTcpNonNumericSensorCsv {
@@ -357,6 +439,22 @@ impl fmt::Display for ModbusTcpNonNumericSensor {
             .fold(String::new(), |acc, m| acc + "\n" + &m.to_string());
 
         write!(f, "{}\n{}", sensor_header, sensor_value_mapping)
+    }
+}
+
+impl GenericSensor for ModbusTcpNonNumericSensor {
+    fn get_id_as_string(&self) -> String {
+        match self.id.clone() {
+            Some(x) => x,
+            None => String::new(),
+        }
+    }
+
+    fn clean_empty_id(&mut self) {
+        let id = self.get_id_as_string();
+        if String::is_empty(&id) {
+            self.id = None;
+        }
     }
 }
 

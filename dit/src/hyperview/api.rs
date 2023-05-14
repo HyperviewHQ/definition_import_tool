@@ -208,18 +208,9 @@ pub fn import_bacnet_numeric_sensors(
     while let Some(Ok(mut sensor)) = reader.deserialize::<BacnetIpNumericSensor>().next() {
         info!("Processing input line: {:?}", sensor);
 
-        let id = match sensor.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
-
-        if sensor.unit_id == Some("".to_string()) {
-            sensor.unit_id = None;
-        }
-
-        if sensor.unit == Some("".to_string()) {
-            sensor.unit = None;
-        }
+        let id = sensor.get_id_as_string();
+        sensor.clean_empty_id();
+        sensor.clean_sensor_empty_unit();
 
         match Uuid::try_parse(&id) {
             Ok(u) => {
@@ -283,18 +274,9 @@ pub fn import_modbus_numeric_sensors(
     while let Some(Ok(mut sensor)) = reader.deserialize::<ModbusTcpNumericSensor>().next() {
         info!("Processing input line: {:?}", sensor);
 
-        let id = match sensor.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
-
-        if sensor.unit_id == Some("".to_string()) {
-            sensor.unit_id = None;
-        }
-
-        if sensor.unit == Some("".to_string()) {
-            sensor.unit = None;
-        }
+        let id = sensor.get_id_as_string();
+        sensor.clean_empty_id();
+        sensor.clean_sensor_empty_unit();
 
         match Uuid::try_parse(&id) {
             Ok(u) => {
@@ -359,14 +341,8 @@ pub fn import_bacnet_non_numeric_sensors(
         info!("Processing input line: {:?}", sensor_csv);
         let mut sensor: BacnetIpNonNumericSensor = sensor_csv.into();
 
-        let id = match sensor.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
-
-        if String::is_empty(&id) {
-            sensor.id = None;
-        }
+        let id = sensor.get_id_as_string();
+        sensor.clean_empty_id();
 
         match Uuid::try_parse(&id) {
             Ok(u) => {
@@ -431,14 +407,8 @@ pub fn import_modbus_non_numeric_sensors(
         info!("Processing input line: {:?}", sensor_csv);
         let mut sensor: ModbusTcpNonNumericSensor = sensor_csv.into();
 
-        let id = match sensor.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
-
-        if String::is_empty(&id) {
-            sensor.id = None;
-        }
+        let id = sensor.get_id_as_string();
+        sensor.clean_empty_id();
 
         match Uuid::try_parse(&id) {
             Ok(u) => {
