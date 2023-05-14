@@ -256,15 +256,20 @@ mod tests {
     #[test]
     fn test_app_config_loading() {
         let mut tmp_file = NamedTempFile::new().unwrap();
-        write!(tmp_file, r#"client_id = "test_id"
+        write!(
+            tmp_file,
+            r#"client_id = "test_id"
 client_secret = "test_secret"
 scope = "test_scope"
 auth_url = "https://test_auth_url"
 token_url = "https://test_token_url"
 instance_url = "https://test_instance_url"
-"#).unwrap();
+"#
+        )
+        .unwrap();
 
-        let config: AppConfig = confy::load_path(tmp_file.path().to_str().unwrap().to_string()).unwrap();
+        let config: AppConfig =
+            confy::load_path(tmp_file.path().to_str().unwrap().to_string()).unwrap();
 
         assert_eq!(config.client_id, "test_id");
         assert_eq!(config.client_secret, "test_secret");
