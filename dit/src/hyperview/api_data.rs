@@ -602,4 +602,178 @@ mod tests {
 
         assert_eq!(data, expected_data);
     }
+
+    #[test]
+    fn test_get_id_as_string() {
+        let mut sensor = BacnetIpNumericSensor {
+            id: Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()),
+            ..Default::default()
+        };
+        assert_eq!(
+            sensor.get_id_as_string(),
+            "13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()
+        );
+
+        sensor.id = Some("".to_string());
+        assert_eq!(sensor.get_id_as_string(), "".to_string());
+
+        sensor.id = None;
+        assert_eq!(sensor.get_id_as_string(), "".to_string());
+
+        let mut sensor = BacnetIpNonNumericSensor {
+            id: Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()),
+            ..Default::default()
+        };
+        assert_eq!(
+            sensor.get_id_as_string(),
+            "13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()
+        );
+
+        sensor.id = Some("".to_string());
+        assert_eq!(sensor.get_id_as_string(), "".to_string());
+
+        sensor.id = None;
+        assert_eq!(sensor.get_id_as_string(), "".to_string());
+
+        let mut sensor = ModbusTcpNumericSensor {
+            id: Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()),
+            ..Default::default()
+        };
+        assert_eq!(
+            sensor.get_id_as_string(),
+            "13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()
+        );
+
+        sensor.id = Some("".to_string());
+        assert_eq!(sensor.get_id_as_string(), "".to_string());
+
+        sensor.id = None;
+        assert_eq!(sensor.get_id_as_string(), "".to_string());
+
+        let mut sensor = ModbusTcpNonNumericSensor {
+            id: Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()),
+            ..Default::default()
+        };
+        assert_eq!(
+            sensor.get_id_as_string(),
+            "13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()
+        );
+
+        sensor.id = Some("".to_string());
+        assert_eq!(sensor.get_id_as_string(), "".to_string());
+
+        sensor.id = None;
+        assert_eq!(sensor.get_id_as_string(), "".to_string());
+    }
+
+    #[test]
+    fn test_clean_empty_id() {
+        let mut sensor = BacnetIpNumericSensor {
+            id: Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()),
+            ..Default::default()
+        };
+        sensor.clean_empty_id();
+        assert_eq!(
+            sensor.id,
+            Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string())
+        );
+
+        sensor.id = Some("".to_string());
+        sensor.clean_empty_id();
+        assert_eq!(sensor.id, None);
+
+        sensor.id = None;
+        sensor.clean_empty_id();
+        assert_eq!(sensor.id, None);
+
+        sensor.unit = Some("".to_string());
+        sensor.unit_id = Some("".to_string());
+        sensor.clean_sensor_empty_unit();
+        assert_eq!(sensor.unit, None);
+        assert_eq!(sensor.unit_id, None);
+
+        sensor.unit = Some("286194d7-a688-468e-b7a3-6ae8cd5ec1e4".to_string());
+        sensor.unit_id = Some("0508c778-e84e-4bc6-b143-da485bdb7682".to_string());
+        sensor.clean_sensor_empty_unit();
+        assert_eq!(
+            sensor.unit,
+            Some("286194d7-a688-468e-b7a3-6ae8cd5ec1e4".to_string())
+        );
+        assert_eq!(
+            sensor.unit_id,
+            Some("0508c778-e84e-4bc6-b143-da485bdb7682".to_string())
+        );
+
+        let mut sensor = ModbusTcpNumericSensor {
+            id: Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()),
+            ..Default::default()
+        };
+        sensor.clean_empty_id();
+        assert_eq!(
+            sensor.id,
+            Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string())
+        );
+
+        sensor.id = Some("".to_string());
+        sensor.clean_empty_id();
+        assert_eq!(sensor.id, None);
+
+        sensor.id = None;
+        sensor.clean_empty_id();
+        assert_eq!(sensor.id, None);
+
+        sensor.unit = Some("".to_string());
+        sensor.unit_id = Some("".to_string());
+        sensor.clean_sensor_empty_unit();
+        assert_eq!(sensor.unit, None);
+        assert_eq!(sensor.unit_id, None);
+
+        sensor.unit = Some("286194d7-a688-468e-b7a3-6ae8cd5ec1e4".to_string());
+        sensor.unit_id = Some("0508c778-e84e-4bc6-b143-da485bdb7682".to_string());
+        sensor.clean_sensor_empty_unit();
+        assert_eq!(
+            sensor.unit,
+            Some("286194d7-a688-468e-b7a3-6ae8cd5ec1e4".to_string())
+        );
+        assert_eq!(
+            sensor.unit_id,
+            Some("0508c778-e84e-4bc6-b143-da485bdb7682".to_string())
+        );
+
+        let mut sensor = BacnetIpNonNumericSensor {
+            id: Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()),
+            ..Default::default()
+        };
+        sensor.clean_empty_id();
+        assert_eq!(
+            sensor.id,
+            Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string())
+        );
+
+        sensor.id = Some("".to_string());
+        sensor.clean_empty_id();
+        assert_eq!(sensor.id, None);
+
+        sensor.id = None;
+        sensor.clean_empty_id();
+        assert_eq!(sensor.id, None);
+
+        let mut sensor = ModbusTcpNonNumericSensor{
+            id: Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()),
+            ..Default::default()
+        };
+        sensor.clean_empty_id();
+        assert_eq!(
+            sensor.id,
+            Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string())
+        );
+
+        sensor.id = Some("".to_string());
+        sensor.clean_empty_id();
+        assert_eq!(sensor.id, None);
+
+        sensor.id = None;
+        sensor.clean_empty_id();
+        assert_eq!(sensor.id, None);
+    }
 }
