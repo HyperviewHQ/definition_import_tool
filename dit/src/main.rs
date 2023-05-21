@@ -5,14 +5,14 @@ use std::path::Path;
 
 use crate::hyperview::{
     api::{
-        add_bacnet_definition, import_bacnet_non_numeric_sensors, import_bacnet_numeric_sensors,
-        import_modbus_non_numeric_sensors, import_modbus_numeric_sensors,
-        list_bacnet_non_numeric_sensors, list_bacnet_numeric_sensors, list_definitions,
-        list_modbus_non_numeric_sensors, list_modbus_numeric_sensors, list_sensor_types,
+        add_definition, import_bacnet_non_numeric_sensors, import_bacnet_numeric_sensors,
+        import_modbus_non_numeric_sensors, import_modbus_numeric_sensors, list_definitions,
+        list_sensor_types, list_sensors,
     },
     api_data::{
-        BacnetIpNonNumericSensorExportWrapper, DefinitionType,
-        ModbusTcpNonNumericSensorExportWrapper,
+        BacnetIpNonNumericSensor, BacnetIpNonNumericSensorExportWrapper, BacnetIpNumericSensor,
+        DefinitionDataType, DefinitionType, ModbusTcpNonNumericSensor,
+        ModbusTcpNonNumericSensorExportWrapper, ModbusTcpNumericSensor,
     },
     app_errors::AppError,
     auth::get_auth_header,
@@ -54,7 +54,7 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::AddBacnetDefinition(options) => {
-            let resp = add_bacnet_definition(
+            let resp = add_definition(
                 &config,
                 options.name.clone(),
                 options.asset_type.clone(),
@@ -67,11 +67,15 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::ListBacnetNumericSensors(options) => {
-            let resp = list_bacnet_numeric_sensors(
+            let mut resp: Vec<BacnetIpNumericSensor> = Vec::new();
+            list_sensors(
                 &config,
+                DefinitionType::Bacnet,
+                DefinitionDataType::Numeric,
                 options.definition_id.clone(),
                 auth_header,
                 req,
+                &mut resp,
             )?;
             let filename = &options.filename;
             let output_type = &options.output_type;
@@ -80,11 +84,15 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::ListBacnetNonNumericSensors(options) => {
-            let resp = list_bacnet_non_numeric_sensors(
+            let mut resp: Vec<BacnetIpNonNumericSensor> = Vec::new();
+            list_sensors(
                 &config,
+                DefinitionType::Bacnet,
+                DefinitionDataType::NonNumeric,
                 options.definition_id.clone(),
                 auth_header,
                 req,
+                &mut resp,
             )?;
             let resp_export_do: Vec<BacnetIpNonNumericSensorExportWrapper> = resp
                 .into_iter()
@@ -154,7 +162,7 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::AddModbusDefinition(options) => {
-            let resp = add_bacnet_definition(
+            let resp = add_definition(
                 &config,
                 options.name.clone(),
                 options.asset_type.clone(),
@@ -167,11 +175,15 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::ListModbusNumericSensors(options) => {
-            let resp = list_modbus_numeric_sensors(
+            let mut resp: Vec<ModbusTcpNumericSensor> = Vec::new();
+            list_sensors(
                 &config,
+                DefinitionType::Modbus,
+                DefinitionDataType::Numeric,
                 options.definition_id.clone(),
                 auth_header,
                 req,
+                &mut resp,
             )?;
             let filename = &options.filename;
             let output_type = &options.output_type;
@@ -180,11 +192,15 @@ fn main() -> Result<()> {
         }
 
         LoaderCommands::ListModbusNonNumericSensors(options) => {
-            let resp = list_modbus_non_numeric_sensors(
+            let mut resp: Vec<ModbusTcpNonNumericSensor> = Vec::new();
+            list_sensors(
                 &config,
+                DefinitionType::Modbus,
+                DefinitionDataType::NonNumeric,
                 options.definition_id.clone(),
                 auth_header,
                 req,
+                &mut resp,
             )?;
             let resp_export_do: Vec<ModbusTcpNonNumericSensorExportWrapper> = resp
                 .into_iter()

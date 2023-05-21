@@ -18,6 +18,12 @@ pub enum DefinitionType {
     Modbus,
 }
 
+#[derive(Debug)]
+pub enum DefinitionDataType {
+    Numeric,
+    NonNumeric,
+}
+
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Definition {
@@ -758,7 +764,7 @@ mod tests {
         sensor.clean_empty_id();
         assert_eq!(sensor.id, None);
 
-        let mut sensor = ModbusTcpNonNumericSensor{
+        let mut sensor = ModbusTcpNonNumericSensor {
             id: Some("13d2cbd0-77c0-49a4-b9c8-38d91ce957d8".to_string()),
             ..Default::default()
         };

@@ -4,6 +4,7 @@ use reqwest::{
     blocking::Client,
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
 };
+use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
 
@@ -41,103 +42,60 @@ pub fn list_definitions(
     Ok(resp)
 }
 
-pub fn list_bacnet_numeric_sensors(
+pub fn list_sensors<T: Serialize + DeserializeOwned + GenericSensor>(
     config: &AppConfig,
+    definition_type: DefinitionType,
+    definition_data_type: DefinitionDataType,
     definition_id: String,
     auth_header: String,
     req: Client,
-) -> Result<Vec<BacnetIpNumericSensor>> {
+    resp: &mut Vec<T>,
+) -> Result<()> {
     // format target
-    let target_url = format!(
-        "{}{}/bacnetIpNumericSensors/{}",
-        config.instance_url, BACNET_API_PREFIX, definition_id
-    );
+    let target_url = match definition_type {
+        DefinitionType::Bacnet => match definition_data_type {
+            DefinitionDataType::Numeric => {
+                format!(
+                    "{}{}/bacnetIpNumericSensors/{}",
+                    config.instance_url, BACNET_API_PREFIX, definition_id
+                )
+            }
+            DefinitionDataType::NonNumeric => {
+                format!(
+                    "{}{}/bacnetIpNonNumericSensors/{}",
+                    config.instance_url, BACNET_API_PREFIX, definition_id
+                )
+            }
+        },
+        DefinitionType::Modbus => match definition_data_type {
+            DefinitionDataType::Numeric => {
+                format!(
+                    "{}{}/modbusTcpNumericSensors/{}",
+                    config.instance_url, MODBUS_API_PREFIX, definition_id
+                )
+            }
+            DefinitionDataType::NonNumeric => {
+                format!(
+                    "{}{}/modbusTcpNonNumericSensors/{}",
+                    config.instance_url, MODBUS_API_PREFIX, definition_id
+                )
+            }
+        },
+    };
 
     // Get response
-    let resp = req
+    *resp = req
         .get(target_url)
         .header(AUTHORIZATION, auth_header)
         .header(CONTENT_TYPE, "application/json")
         .header(ACCEPT, "application/json")
         .send()?
-        .json::<Vec<BacnetIpNumericSensor>>()?;
+        .json::<Vec<T>>()?;
 
-    Ok(resp)
+    Ok(())
 }
 
-pub fn list_modbus_numeric_sensors(
-    config: &AppConfig,
-    definition_id: String,
-    auth_header: String,
-    req: Client,
-) -> Result<Vec<ModbusTcpNumericSensor>> {
-    // format target
-    let target_url = format!(
-        "{}{}/modbusTcpNumericSensors/{}",
-        config.instance_url, MODBUS_API_PREFIX, definition_id
-    );
-
-    // Get response
-    let resp = req
-        .get(target_url)
-        .header(AUTHORIZATION, auth_header)
-        .header(CONTENT_TYPE, "application/json")
-        .header(ACCEPT, "application/json")
-        .send()?
-        .json::<Vec<ModbusTcpNumericSensor>>()?;
-
-    Ok(resp)
-}
-
-pub fn list_bacnet_non_numeric_sensors(
-    config: &AppConfig,
-    definition_id: String,
-    auth_header: String,
-    req: Client,
-) -> Result<Vec<BacnetIpNonNumericSensor>> {
-    // format target
-    let target_url = format!(
-        "{}{}/bacnetIpNonNumericSensors/{}",
-        config.instance_url, BACNET_API_PREFIX, definition_id
-    );
-
-    // Get response
-    let resp = req
-        .get(target_url)
-        .header(AUTHORIZATION, auth_header)
-        .header(CONTENT_TYPE, "application/json")
-        .header(ACCEPT, "application/json")
-        .send()?
-        .json::<Vec<BacnetIpNonNumericSensor>>()?;
-
-    Ok(resp)
-}
-
-pub fn list_modbus_non_numeric_sensors(
-    config: &AppConfig,
-    definition_id: String,
-    auth_header: String,
-    req: Client,
-) -> Result<Vec<ModbusTcpNonNumericSensor>> {
-    // format target
-    let target_url = format!(
-        "{}{}/modbusTcpNonNumericSensors/{}",
-        config.instance_url, MODBUS_API_PREFIX, definition_id
-    );
-
-    // Get response
-    let resp = req
-        .get(target_url)
-        .header(AUTHORIZATION, auth_header)
-        .header(CONTENT_TYPE, "application/json")
-        .header(ACCEPT, "application/json")
-        .send()?
-        .json::<Vec<ModbusTcpNonNumericSensor>>()?;
-
-    Ok(resp)
-}
-
-pub fn add_bacnet_definition(
+pub fn add_definition(
     config: &AppConfig,
     name: String,
     asset_type: String,
