@@ -1,10 +1,9 @@
-use anyhow::Result;
 use log::{error, info};
 use reqwest::{
-    blocking::Client,
+    Client,
     header::{ACCEPT, AUTHORIZATION, CONTENT_TYPE},
 };
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{Serialize, de::DeserializeOwned};
 use serde_json::Value;
 use uuid::Uuid;
 
@@ -14,12 +13,12 @@ const BACNET_API_PREFIX: &str = "/api/setting/bacnetIpDefinitions";
 const MODBUS_API_PREFIX: &str = "/api/setting/modbusTcpDefinitions";
 const SENSOR_TYPE_ASSET_TYPE: &str = "/api/setting/sensorTypeAssetType";
 
-pub fn list_definitions(
+pub async fn list_definitions(
     config: &AppConfig,
     definition_type: DefinitionType,
     auth_header: String,
     req: Client,
-) -> Result<Vec<Definition>> {
+) -> anyhow::Result<Vec<Definition>> {
     // format target
     let target_url = match definition_type {
         DefinitionType::Bacnet => {
@@ -36,13 +35,15 @@ pub fn list_definitions(
         .header(AUTHORIZATION, auth_header)
         .header(CONTENT_TYPE, "application/json")
         .header(ACCEPT, "application/json")
-        .send()?
-        .json::<Vec<Definition>>()?;
+        .send()
+        .await?
+        .json::<Vec<Definition>>()
+        .await?;
 
     Ok(resp)
 }
 
-pub fn list_sensors<T: Serialize + DeserializeOwned + GenericSensor>(
+pub async fn list_sensors<T: Serialize + DeserializeOwned + GenericSensor>(
     config: &AppConfig,
     definition_type: DefinitionType,
     definition_data_type: DefinitionDataType,
@@ -50,7 +51,7 @@ pub fn list_sensors<T: Serialize + DeserializeOwned + GenericSensor>(
     auth_header: String,
     req: Client,
     resp: &mut Vec<T>,
-) -> Result<()> {
+) -> anyhow::Result<()> {
     // format target
     let target_url = match definition_type {
         DefinitionType::Bacnet => match definition_data_type {
@@ -89,20 +90,22 @@ pub fn list_sensors<T: Serialize + DeserializeOwned + GenericSensor>(
         .header(AUTHORIZATION, auth_header)
         .header(CONTENT_TYPE, "application/json")
         .header(ACCEPT, "application/json")
-        .send()?
-        .json::<Vec<T>>()?;
+        .send()
+        .await?
+        .json::<Vec<T>>()
+        .await?;
 
     Ok(())
 }
 
-pub fn add_definition(
+pub async fn add_definition(
     config: &AppConfig,
     name: String,
     asset_type: String,
     definition_type: DefinitionType,
     auth_header: String,
     req: Client,
-) -> Result<Value> {
+) -> anyhow::Result<Value> {
     // format target
     let target_url = match definition_type {
         DefinitionType::Bacnet => {
@@ -126,18 +129,20 @@ pub fn add_definition(
         .header(CONTENT_TYPE, "application/json")
         .header(ACCEPT, "application/json")
         .json(&def)
-        .send()?
-        .json::<Value>()?;
+        .send()
+        .await?
+        .json::<Value>()
+        .await?;
 
     Ok(resp)
 }
 
-pub fn list_sensor_types(
+pub async fn list_sensor_types(
     config: &AppConfig,
     query: Vec<(String, String)>,
     auth_header: String,
     req: Client,
-) -> Result<Vec<SensorType>> {
+) -> anyhow::Result<Vec<SensorType>> {
     // format target
     let target_url = format!("{}{}", config.instance_url, SENSOR_TYPE_ASSET_TYPE);
 
@@ -148,19 +153,21 @@ pub fn list_sensor_types(
         .header(CONTENT_TYPE, "application/json")
         .header(ACCEPT, "application/json")
         .query(&query)
-        .send()?
-        .json::<Vec<SensorType>>()?;
+        .send()
+        .await?
+        .json::<Vec<SensorType>>()
+        .await?;
 
     Ok(resp)
 }
 
-pub fn import_bacnet_numeric_sensors(
+pub async fn import_bacnet_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
     auth_header: String,
     req: Client,
-) -> Result<()> {
+) -> anyhow::Result<()> {
     let mut reader = csv::Reader::from_path(filename)?;
 
     while let Some(Ok(mut sensor)) = reader.deserialize::<BacnetIpNumericSensor>().next() {
@@ -186,8 +193,10 @@ pub fn import_bacnet_numeric_sensors(
                     .header(CONTENT_TYPE, "application/json")
                     .header(ACCEPT, "application/json")
                     .json(&sensor)
-                    .send()?
-                    .json::<Value>()?;
+                    .send()
+                    .await?
+                    .json::<Value>()
+                    .await?;
 
                 println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
             }
@@ -206,8 +215,10 @@ pub fn import_bacnet_numeric_sensors(
                         .header(CONTENT_TYPE, "application/json")
                         .header(ACCEPT, "application/json")
                         .json(&sensor)
-                        .send()?
-                        .json::<Value>()?;
+                        .send()
+                        .await?
+                        .json::<Value>()
+                        .await?;
 
                     println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
                 } else {
@@ -220,13 +231,13 @@ pub fn import_bacnet_numeric_sensors(
     Ok(())
 }
 
-pub fn import_modbus_numeric_sensors(
+pub async fn import_modbus_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
     auth_header: String,
     req: Client,
-) -> Result<()> {
+) -> anyhow::Result<()> {
     let mut reader = csv::Reader::from_path(filename)?;
 
     while let Some(Ok(mut sensor)) = reader.deserialize::<ModbusTcpNumericSensor>().next() {
@@ -252,8 +263,10 @@ pub fn import_modbus_numeric_sensors(
                     .header(CONTENT_TYPE, "application/json")
                     .header(ACCEPT, "application/json")
                     .json(&sensor)
-                    .send()?
-                    .json::<Value>()?;
+                    .send()
+                    .await?
+                    .json::<Value>()
+                    .await?;
 
                 println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
             }
@@ -272,8 +285,10 @@ pub fn import_modbus_numeric_sensors(
                         .header(CONTENT_TYPE, "application/json")
                         .header(ACCEPT, "application/json")
                         .json(&sensor)
-                        .send()?
-                        .json::<Value>()?;
+                        .send()
+                        .await?
+                        .json::<Value>()
+                        .await?;
 
                     println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
                 } else {
@@ -286,13 +301,13 @@ pub fn import_modbus_numeric_sensors(
     Ok(())
 }
 
-pub fn import_bacnet_non_numeric_sensors(
+pub async fn import_bacnet_non_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
     auth_header: String,
     req: Client,
-) -> Result<()> {
+) -> anyhow::Result<()> {
     let mut reader = csv::Reader::from_path(filename)?;
 
     while let Some(Ok(sensor_csv)) = reader.deserialize::<BacnetIpNonNumericSersorCsv>().next() {
@@ -318,8 +333,10 @@ pub fn import_bacnet_non_numeric_sensors(
                     .header(CONTENT_TYPE, "application/json")
                     .header(ACCEPT, "application/json")
                     .json(&sensor)
-                    .send()?
-                    .json::<Value>()?;
+                    .send()
+                    .await?
+                    .json::<Value>()
+                    .await?;
 
                 println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
             }
@@ -338,8 +355,10 @@ pub fn import_bacnet_non_numeric_sensors(
                         .header(CONTENT_TYPE, "application/json")
                         .header(ACCEPT, "application/json")
                         .json(&sensor)
-                        .send()?
-                        .json::<Value>()?;
+                        .send()
+                        .await?
+                        .json::<Value>()
+                        .await?;
 
                     println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
                 } else {
@@ -352,13 +371,13 @@ pub fn import_bacnet_non_numeric_sensors(
     Ok(())
 }
 
-pub fn import_modbus_non_numeric_sensors(
+pub async fn import_modbus_non_numeric_sensors(
     config: &AppConfig,
     definition_id: String,
     filename: String,
     auth_header: String,
     req: Client,
-) -> Result<()> {
+) -> anyhow::Result<()> {
     let mut reader = csv::Reader::from_path(filename)?;
 
     while let Some(Ok(sensor_csv)) = reader.deserialize::<ModbusTcpNonNumericSensorCsv>().next() {
@@ -384,8 +403,10 @@ pub fn import_modbus_non_numeric_sensors(
                     .header(CONTENT_TYPE, "application/json")
                     .header(ACCEPT, "application/json")
                     .json(&sensor)
-                    .send()?
-                    .json::<Value>()?;
+                    .send()
+                    .await?
+                    .json::<Value>()
+                    .await?;
 
                 println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
             }
@@ -404,8 +425,10 @@ pub fn import_modbus_non_numeric_sensors(
                         .header(CONTENT_TYPE, "application/json")
                         .header(ACCEPT, "application/json")
                         .json(&sensor)
-                        .send()?
-                        .json::<Value>()?;
+                        .send()
+                        .await?
+                        .json::<Value>()
+                        .await?;
 
                     println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
                 } else {

@@ -1,4 +1,3 @@
-use anyhow::Result;
 use clap::Parser;
 use log::{error, info};
 use std::path::Path;
@@ -17,13 +16,14 @@ use crate::hyperview::{
     app_errors::AppError,
     auth::get_auth_header,
     cli::{
-        get_config_path, get_debug_filter, handle_output_choice, AppArgs, AppConfig, LoaderCommands,
+        AppArgs, AppConfig, LoaderCommands, get_config_path, get_debug_filter, handle_output_choice,
     },
 };
 
 mod hyperview;
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     let args = AppArgs::parse();
 
     let debug_level = args.debug_level;
@@ -38,14 +38,14 @@ fn main() -> Result<()> {
     info!("Hyperview Instance: {}", config.instance_url);
 
     // Get Authorization header for request
-    let auth_header = get_auth_header(&config)?;
+    let auth_header = get_auth_header(&config).await?;
 
     // Start http client
-    let req = reqwest::blocking::Client::new();
+    let req = reqwest::Client::new();
 
     match &args.command {
         LoaderCommands::ListBacnetDefinitions => {
-            let resp = list_definitions(&config, DefinitionType::Bacnet, auth_header, req)?;
+            let resp = list_definitions(&config, DefinitionType::Bacnet, auth_header, req).await?;
 
             for (i, d) in resp.iter().enumerate() {
                 println!("---- [{}] ----", i);
@@ -61,7 +61,8 @@ fn main() -> Result<()> {
                 DefinitionType::Bacnet,
                 auth_header,
                 req,
-            )?;
+            )
+            .await?;
 
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
@@ -76,7 +77,8 @@ fn main() -> Result<()> {
                 auth_header,
                 req,
                 &mut resp,
-            )?;
+            )
+            .await?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 
@@ -93,7 +95,8 @@ fn main() -> Result<()> {
                 auth_header,
                 req,
                 &mut resp,
-            )?;
+            )
+            .await?;
             let resp_export_do: Vec<BacnetIpNonNumericSensorExportWrapper> = resp
                 .into_iter()
                 .map(BacnetIpNonNumericSensorExportWrapper)
@@ -125,7 +128,8 @@ fn main() -> Result<()> {
                 filename.to_owned(),
                 auth_header,
                 req,
-            )?;
+            )
+            .await?;
         }
 
         LoaderCommands::ImportBacnetNonNumericSensors(options) => {
@@ -149,11 +153,12 @@ fn main() -> Result<()> {
                 filename.to_owned(),
                 auth_header,
                 req,
-            )?;
+            )
+            .await?;
         }
 
         LoaderCommands::ListModbusDefinitions => {
-            let resp = list_definitions(&config, DefinitionType::Modbus, auth_header, req)?;
+            let resp = list_definitions(&config, DefinitionType::Modbus, auth_header, req).await?;
 
             for (i, d) in resp.iter().enumerate() {
                 println!("---- [{}] ----", i);
@@ -169,7 +174,8 @@ fn main() -> Result<()> {
                 DefinitionType::Modbus,
                 auth_header,
                 req,
-            )?;
+            )
+            .await?;
 
             println!("server respone: {}", serde_json::to_string_pretty(&resp)?);
         }
@@ -184,7 +190,8 @@ fn main() -> Result<()> {
                 auth_header,
                 req,
                 &mut resp,
-            )?;
+            )
+            .await?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 
@@ -201,7 +208,8 @@ fn main() -> Result<()> {
                 auth_header,
                 req,
                 &mut resp,
-            )?;
+            )
+            .await?;
             let resp_export_do: Vec<ModbusTcpNonNumericSensorExportWrapper> = resp
                 .into_iter()
                 .map(ModbusTcpNonNumericSensorExportWrapper)
@@ -233,7 +241,8 @@ fn main() -> Result<()> {
                 filename.to_owned(),
                 auth_header,
                 req,
-            )?;
+            )
+            .await?;
         }
 
         LoaderCommands::ImportModbusNonNumericSensors(options) => {
@@ -257,7 +266,8 @@ fn main() -> Result<()> {
                 filename.to_owned(),
                 auth_header,
                 req,
-            )?;
+            )
+            .await?;
         }
 
         LoaderCommands::ListSensorTypes(options) => {
@@ -269,7 +279,7 @@ fn main() -> Result<()> {
                 ),
             ];
 
-            let resp = list_sensor_types(&config, query, auth_header, req)?;
+            let resp = list_sensor_types(&config, query, auth_header, req).await?;
             let filename = &options.filename;
             let output_type = &options.output_type;
 

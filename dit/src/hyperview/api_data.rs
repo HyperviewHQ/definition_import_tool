@@ -1,5 +1,5 @@
-use serde::{ser::SerializeStruct, Deserialize, Serialize};
-use serde_with::{serde_as, DefaultOnError};
+use serde::{Deserialize, Serialize, ser::SerializeStruct};
+use serde_with::{DefaultOnError, serde_as};
 use std::fmt;
 
 // marker trait
@@ -37,10 +37,7 @@ pub struct Definition {
 
 impl fmt::Display for Definition {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let id = match self.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
+        let id = self.id.clone().unwrap_or_default();
 
         write!(
             f,
@@ -74,35 +71,29 @@ pub struct BacnetIpNumericSensor {
 
 impl fmt::Display for BacnetIpNumericSensor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let id = match self.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
-
-        let unit = match self.unit.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
-
-        let unit_id = match self.unit_id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
+        let id = self.id.clone().unwrap_or_default();
+        let unit = self.unit.clone().unwrap_or_default();
+        let unit_id = self.unit_id.clone().unwrap_or_default();
 
         write!(
             f,
             "id: {}\nname: {}\nmultiplier: {}\nobject_instance: {}\nobject_type: {}\nsensor type: {}\nsensor type id: {}\nunit: {}\nunit id: {}",
-            id, self.name, self.multiplier, self.object_instance, self.object_type, self.sensor_type, self.sensor_type_id, unit, unit_id
+            id,
+            self.name,
+            self.multiplier,
+            self.object_instance,
+            self.object_type,
+            self.sensor_type,
+            self.sensor_type_id,
+            unit,
+            unit_id
         )
     }
 }
 
 impl GenericSensor for BacnetIpNumericSensor {
     fn get_id_as_string(&self) -> String {
-        match self.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        }
+        self.id.clone().unwrap_or_default()
     }
 
     fn clean_empty_id(&mut self) {
@@ -172,10 +163,7 @@ pub struct BacnetIpNonNumericSensor {
 
 impl fmt::Display for BacnetIpNonNumericSensor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let id = match self.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
+        let id = self.id.clone().unwrap_or_default();
 
         let sensor_header = format!(
             "id: {}\nname: {}\nobject type: {}\nsensor type: {}\nsensor type id: {}",
@@ -192,10 +180,7 @@ impl fmt::Display for BacnetIpNonNumericSensor {
 
 impl GenericSensor for BacnetIpNonNumericSensor {
     fn get_id_as_string(&self) -> String {
-        match self.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        }
+        self.id.clone().unwrap_or_default()
     }
 
     fn clean_empty_id(&mut self) {
@@ -333,35 +318,30 @@ pub struct ModbusTcpNumericSensor {
 
 impl fmt::Display for ModbusTcpNumericSensor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let id = match self.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
-
-        let unit = match self.unit.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
-
-        let unit_id = match self.unit_id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
+        let id = self.id.clone().unwrap_or_default();
+        let unit = self.unit.clone().unwrap_or_default();
+        let unit_id = self.unit_id.clone().unwrap_or_default();
 
         write!(
             f,
             "id: {}\nname: {}\nmultiplier: {}\naddress: {}\nregister_type: {}\ndata setting: {}\nsensor type: {}\nsensor type id: {}\nunit: {}\nunit id: {}",
-            id, self.name, self.multiplier, self.address, self.register_type, self.data_setting, self.sensor_type, self.sensor_type_id, unit, unit_id
+            id,
+            self.name,
+            self.multiplier,
+            self.address,
+            self.register_type,
+            self.data_setting,
+            self.sensor_type,
+            self.sensor_type_id,
+            unit,
+            unit_id
         )
     }
 }
 
 impl GenericSensor for ModbusTcpNumericSensor {
     fn get_id_as_string(&self) -> String {
-        match self.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        }
+        self.id.clone().unwrap_or_default()
     }
 
     fn clean_empty_id(&mut self) {
@@ -430,14 +410,19 @@ pub struct ModbusTcpNonNumericSensor {
 
 impl fmt::Display for ModbusTcpNonNumericSensor {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let id = match self.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        };
+        let id = self.id.clone().unwrap_or_default();
 
         let sensor_header = format!(
             "id: {}\nname: {}\naddress: {}\ndata type: {}\nregister type: {}\nstart bit: {}\nend bit: {}\nsensor type: {}\nsensor type id: {}",
-            id, self.name, self.address, self.data_type, self.register_type, self.start_bit, self.end_bit, self.sensor_type, self.sensor_type_id
+            id,
+            self.name,
+            self.address,
+            self.data_type,
+            self.register_type,
+            self.start_bit,
+            self.end_bit,
+            self.sensor_type,
+            self.sensor_type_id
         );
         let sensor_value_mapping = &self
             .value_mapping
@@ -450,10 +435,7 @@ impl fmt::Display for ModbusTcpNonNumericSensor {
 
 impl GenericSensor for ModbusTcpNonNumericSensor {
     fn get_id_as_string(&self) -> String {
-        match self.id.clone() {
-            Some(x) => x,
-            None => String::new(),
-        }
+        self.id.clone().unwrap_or_default()
     }
 
     fn clean_empty_id(&mut self) {

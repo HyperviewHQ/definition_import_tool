@@ -1,10 +1,10 @@
 use anyhow::Result;
 use clap::{Args, Parser, Subcommand};
 use csv::Writer;
-use log::{error, LevelFilter};
+use log::{LevelFilter, error};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
-use std::path::{Path, MAIN_SEPARATOR_STR};
+use std::path::{MAIN_SEPARATOR_STR, Path};
 
 use crate::hyperview::app_errors::AppError;
 
@@ -268,8 +268,7 @@ instance_url = "https://test_instance_url"
         )
         .unwrap();
 
-        let config: AppConfig =
-            confy::load_path(tmp_file.path().to_str().unwrap().to_string()).unwrap();
+        let config: AppConfig = confy::load_path(tmp_file.path().to_str().unwrap()).unwrap();
 
         assert_eq!(config.client_id, "test_id");
         assert_eq!(config.client_secret, "test_secret");
@@ -331,13 +330,13 @@ instance_url = "https://test_instance_url"
         let output_type = "csv".to_string();
         let temp_file = NamedTempFile::new().unwrap();
         let temp_file_path = temp_file.path().to_str().unwrap().to_string();
-        let filename = Some(temp_file_path.clone() + "_new");
+        let filename = temp_file_path.clone() + "_new";
         let resp: Vec<i32> = vec![1, 2, 3, 4, 5];
 
-        let result = handle_output_choice(output_type, filename.clone(), resp);
+        let result = handle_output_choice(output_type, Some(filename.clone()), resp);
         assert!(result.is_ok());
 
-        let mut file = File::open(filename.unwrap()).unwrap();
+        let mut file = File::open(filename).unwrap();
         let mut contents = String::new();
         file.read_to_string(&mut contents).unwrap();
 
