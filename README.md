@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This tool is **deprecated**. Its functionality has been moved to the [Hyperview Command Line Interface / HVCLI](https://github.com/HyperviewHQ/hvcli)
+
 # Definition Import Tool (DIT)
 DIT is a tool that allows Hyperview users to import and maintain BACnet and Modbus definitions from the command line. Hyperview has a GUI for users to manage BACnet and Modbus definitions, however, in larger sites with hundreds or thousands of sensors, a command line tool makes it easier to manage the definitions in bulk. 
 
